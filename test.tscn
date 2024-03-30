@@ -1,6 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://bdxmg8idyjt2r"]
+[gd_scene load_steps=3 format=3 uid="uid://bdxmg8idyjt2r"]
 
 [ext_resource type="Script" path="res://source/WorldLoader.cs" id="1_vr68u"]
+[ext_resource type="Texture2D" uid="uid://mlgnf0gihi5n" path="res://icon.svg" id="2_ocl2w"]
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_vr68u")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, 4.37114e-08, 1.91069e-15, 0, 400.542, 0)
+current = true
+fov = 62.2414
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -780, 0, 435)
+visible = false
+pixel_size = 3.292
+texture = ExtResource("2_ocl2w")

@@ -7,8 +7,6 @@ using System.Xml.Linq;
 
 partial class WorldLoader : Node3D
 {
-	LatLon vehicleWorldCoordinate = new LatLon(59.34911, 18.06648);
-
 	Dictionary<long, TrackNode> trackNodes = new Dictionary<long, TrackNode>();
 
 	public WorldLoader()
@@ -19,13 +17,17 @@ partial class WorldLoader : Node3D
 	public override void _Ready()
 	{
 		base._Ready();
-		LoadMapData(new Dictionary<string, string>() { { "railway", "rail" } });
+		WorldRenderer.worldRoot = this;
+		LoadMapData(new KeyValuePair<string, string>[] { 
+			new KeyValuePair<string, string>( "railway", "rail" ),
+			new KeyValuePair<string, string>( "railway", "narrow_gauge" )
+		});
 	}
 
-	private void LoadMapData(Dictionary<string, string> searchTerms, string objectType = "way", int distance = 1000)
+	private void LoadMapData(KeyValuePair<string, string>[] searchTerms, string objectType = "way", int distance = 500)
 	{
-		LatLon neCorner = vehicleWorldCoordinate.MovedMeters(distance, distance);
-		LatLon swCorner = vehicleWorldCoordinate.MovedMeters(-distance, -distance);
+		LatLon neCorner = VehicleManager.vehicleWorldCoordinate.MovedMeters(distance, distance);
+		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.MovedMeters(-distance, -distance);
 		string payload = $"[out:xml];(";
 		
 		foreach (var entry in searchTerms)
@@ -80,7 +82,7 @@ partial class WorldLoader : Node3D
 							//		double.Parse(current.Attributes["lon"].Value)
 							//	)
 							);
-						newNode.WorldCoordinate = new LatLon(double.Parse(current.Attributes["lat"].Value), double.Parse(current.Attributes["lon"].Value));
+						newNode.WorldCoordinate = new LatLon(double.Parse(current.Attributes["lat"].Value.Replace('.',',')), double.Parse(current.Attributes["lon"].Value.Replace('.', ',')));
 						trackNodes.Add(nodeRef, newNode);
 					}
 					if (j > 0)
@@ -90,7 +92,7 @@ partial class WorldLoader : Node3D
 				}
 			}
 		}
-		RenderTrackPoints();
+		RenderTrackNodes();
 	}
 
 	private string EncodeURIPayload(string payload)
@@ -113,15 +115,16 @@ partial class WorldLoader : Node3D
 	}
 
 
-	private void RenderTrackPoints()
+	private void RenderTrackNodes()
 	{
 		foreach (var entry in trackNodes)
 		{
-			TrackNode trackNode = entry.Value;
-			Vector2 localPosition = trackNode.WorldCoordinate.ToLocal(vehicleWorldCoordinate);
-			Node3D point = new Node3D();
-			this.AddChild(point);
-			point.Position = new Vector3(localPosition.X, localPosition.Y, 0);
+			WorldRenderer.RenderTrackNode(entry.Value);
 		}
+	}
+
+	private void RenderTrackSections()
+	{
+
 	}
 }

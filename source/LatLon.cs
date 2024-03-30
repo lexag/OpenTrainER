@@ -55,7 +55,7 @@ internal struct LatLon
     {
         (double mLat, double mLon) = DegreesPerMeter(origin);
         float x =  (float)((this.lon - origin.lon)/mLon);
-        float y =  (float)((this.lat - origin.lat)/mLat);
-        return new Godot.Vector2(x, y);
+        float z =  (float)((this.lat - origin.lat)/mLat);
+        return new Godot.Vector2(z, x);
     }
 }
