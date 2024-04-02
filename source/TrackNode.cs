@@ -1,13 +1,15 @@
 ﻿
+using Godot;
 using System.Collections.Generic;
 
 internal class TrackNode
 {
     LatLon worldCoordinate;
-    List<TrackNode> neighbours = new List<TrackNode>();
+    Dictionary<TrackNode, double> neighbourDistances = new Dictionary<TrackNode, double>();
+    public Node3D physicalNode;
 
     public LatLon WorldCoordinate {  get { return worldCoordinate; } set { worldCoordinate = value; } }
-
+    public Dictionary<TrackNode, double> NeighbourDistances { get { return neighbourDistances; } }
 
 
     public TrackNode(LatLon worldCoordinate)
@@ -19,11 +21,11 @@ internal class TrackNode
 
     public void AddNeighbour(TrackNode neighbour)
     {
-        if (neighbours.Contains(neighbour))
+        if (neighbourDistances.ContainsKey(neighbour))
         {
             return;
         }
-        neighbours.Add(neighbour);
+        neighbourDistances.Add(neighbour, worldCoordinate.DistanceTo_M(neighbour.worldCoordinate));
         neighbour.AddNeighbour(this);
     }
 }

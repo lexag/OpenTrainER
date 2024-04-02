@@ -1,33 +1,35 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
 partial class WorldLoader : Node3D
 {
-	Dictionary<long, TrackNode> trackNodes = new Dictionary<long, TrackNode>();
+	public Dictionary<long, TrackNode> trackNodes = new Dictionary<long, TrackNode>();
+
+	public WorldManager worldManager;
 
 	public WorldLoader()
 	{
 	
 	}
 
-	public override void _Ready()
+	public void Load()
 	{
-		base._Ready();
-		WorldRenderer.worldRoot = this;
-		LoadMapData(new KeyValuePair<string, string>[] { 
+		LoadMapData(new KeyValuePair<string, string>[] {
 			new KeyValuePair<string, string>( "railway", "rail" ),
 			new KeyValuePair<string, string>( "railway", "narrow_gauge" )
 		});
 	}
 
-	private void LoadMapData(KeyValuePair<string, string>[] searchTerms, string objectType = "way", int distance = 500)
+
+	private void LoadMapData(KeyValuePair<string, string>[] searchTerms, string objectType = "way", int distance = 1500)
 	{
-		LatLon neCorner = VehicleManager.vehicleWorldCoordinate.MovedMeters(distance, distance);
-		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.MovedMeters(-distance, -distance);
+		LatLon neCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(distance, distance);
+		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(-distance, -distance);
 		string payload = $"[out:xml];(";
 		
 		foreach (var entry in searchTerms)
@@ -92,7 +94,8 @@ partial class WorldLoader : Node3D
 				}
 			}
 		}
-		RenderTrackNodes();
+		worldManager.trackNodes = trackNodes.Values.ToList<TrackNode>();
+		worldManager.NetworkingDone();
 	}
 
 	private string EncodeURIPayload(string payload)
@@ -112,19 +115,5 @@ partial class WorldLoader : Node3D
 			}
 		}
 		return sb.ToString();
-	}
-
-
-	private void RenderTrackNodes()
-	{
-		foreach (var entry in trackNodes)
-		{
-			WorldRenderer.RenderTrackNode(entry.Value);
-		}
-	}
-
-	private void RenderTrackSections()
-	{
-
 	}
 }

@@ -41,8 +41,13 @@ internal struct LatLon
         return new LatLon(left.Latitude - right.Latitude, left.Longitude - right.Longitude);
     }
 
+    public double DistanceTo_M(LatLon x)
+    {
+        return this.ToLocal_M(x).Length();
+    }
 
-    public LatLon MovedMeters(double offsetLat, double offsetLon)
+
+    public LatLon Moved_M(double offsetLat, double offsetLon)
     {
         (double mLat, double mLon) = DegreesPerMeter(this);
         var newLatitude = this.lat + (offsetLat * mLat);
@@ -51,7 +56,7 @@ internal struct LatLon
         return new LatLon(newLatitude, newLongitude);
     }
 
-    public Godot.Vector2 ToLocal(LatLon origin)
+    public Godot.Vector2 ToLocal_M(LatLon origin)
     {
         (double mLat, double mLon) = DegreesPerMeter(origin);
         float x =  (float)((this.lon - origin.lon)/mLon);
