@@ -78,12 +78,7 @@ partial class WorldLoader : Node3D
 					long nodeRef = long.Parse(current.Attributes["ref"].Value);
 					if (!trackNodes.ContainsKey(nodeRef))
 					{
-						TrackNode newNode = new TrackNode(
-							//new LatLon(
-							//		double.Parse(current.Attributes["lat"].Value),
-							//		double.Parse(current.Attributes["lon"].Value)
-							//	)
-							);
+						TrackNode newNode = new TrackNode();
 						newNode.WorldCoordinate = new LatLon(double.Parse(current.Attributes["lat"].Value.Replace('.',',')), double.Parse(current.Attributes["lon"].Value.Replace('.', ',')));
 						trackNodes.Add(nodeRef, newNode);
 					}

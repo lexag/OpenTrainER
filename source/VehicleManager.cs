@@ -16,9 +16,12 @@ internal static class VehicleManager
 	static TrackNode currentTrackNode;
 	static TrackNode targetTrackNode;
 	static Vector3 travelDirection = new Vector3();
+	static Vector3 cameraLookTarget = new Vector3();
 
-	static float speed = 80/3.6f;
+	static float speed = 50f;
 	static double distanceAlongTrackNode = 0;
+	static double fractionAlongTrackNode = 0;
+	static double currentSegmentLength;
 
 	static Camera3D camera;
 	static Node3D vehicleCursor;
@@ -32,7 +35,7 @@ internal static class VehicleManager
 		camera.Fov = 120;
 		//camera.RotateX(Mathf.Pi / 2);
 		//camera.LookAt(new Vector3(0.001f, 0, 0));
-		
+
 		vehicleCursor = new Node3D();
 		worldManager.AddChild(vehicleCursor);
 
@@ -44,34 +47,47 @@ internal static class VehicleManager
 	{
 		Vector3 deltaTravel = travelDirection * speed * (float)delta;
 		distanceAlongTrackNode += deltaTravel.Length();
+		fractionAlongTrackNode += deltaTravel.Length() / currentSegmentLength;
+
+		Vector3 actualPositionDelta = TrackInterpolation.GetPositionAlongTrack(currentTrackNode, targetTrackNode, (float)fractionAlongTrackNode) - vehicleCursor.Position;
+
 		if (currentTrackNode == null) 
 		{
 			SnapToTrackNode();
 		}
-		if (vehicleCursor.Position.DistanceTo(targetTrackNode.physicalNode.Position) < speed*delta)
+		else if (vehicleCursor.Position.DistanceTo(targetTrackNode.physicalNode.Position) < 2* speed * delta)
 		{
 			TrackNodeStepover();
 		}
 		vehicleWorldCoordinate = vehicleWorldCoordinate.Moved_M(deltaTravel.Y, deltaTravel.X);
-		WorldRenderer.MoveWorld(deltaTravel);
+		WorldRenderer.MoveWorld(actualPositionDelta);
 
-		travelDirection = (targetTrackNode.physicalNode.Position - vehicleCursor.Position).Normalized();
-		camera.LookAt(camera.Position + travelDirection*100);
-    }
+		travelDirection = TrackInterpolation.GetForwardVectorAlongTrack(currentTrackNode, targetTrackNode, (float)fractionAlongTrackNode);// + (targetTrackNode.physicalNode.Position - vehicleCursor.Position).Normalized();
+		cameraLookTarget += (camera.Position + travelDirection * 100) * 0.01f;
+		cameraLookTarget /= 1.01f;
+
+        camera.LookAt(cameraLookTarget);
+	}
 
 
 	static void TrackNodeStepover()
 	{
-		double lastSegmentLength = currentTrackNode.NeighbourDistances[targetTrackNode];
 		currentTrackNode = targetTrackNode;
+		double deviationRecord = 3;
+		TrackNode recordHolder = null;
 		foreach (var entry in targetTrackNode.NeighbourDistances)
 		{
-			if (entry.Key != currentTrackNode)
+			double deviation = travelDirection.AngleTo(entry.Key.physicalNode.Position - targetTrackNode.physicalNode.Position);
+			if (entry.Key != currentTrackNode && deviation < deviationRecord)
 			{
-				targetTrackNode = entry.Key; break;
+				recordHolder = entry.Key;
+				deviationRecord = deviation;
 			}
 		}
+		targetTrackNode = recordHolder;
 		distanceAlongTrackNode = 0;
+		fractionAlongTrackNode = 0;
+		currentSegmentLength = TrackInterpolation.GetLengthOfSegment(currentTrackNode, targetTrackNode);
 	}
 
 	static void SnapToTrackNode()
@@ -87,10 +103,10 @@ internal static class VehicleManager
 				recordHolder = trackNode;
 			}
 		}
-		currentTrackNode = recordHolder;
-		targetTrackNode = currentTrackNode.NeighbourDistances.FirstOrDefault().Key;
-		WorldRenderer.MoveWorld(currentTrackNode.physicalNode.Position);
-
-    }
+		WorldRenderer.MoveWorld(recordHolder.physicalNode.Position);
+		targetTrackNode = recordHolder;
+		currentTrackNode = targetTrackNode;
+		TrackNodeStepover();
+	}
 }
 

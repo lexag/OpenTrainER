@@ -56,11 +56,11 @@ internal struct LatLon
         return new LatLon(newLatitude, newLongitude);
     }
 
-    public Godot.Vector2 ToLocal_M(LatLon origin)
+    public Godot.Vector3 ToLocal_M(LatLon origin)
     {
         (double mLat, double mLon) = DegreesPerMeter(origin);
         float x =  (float)((this.lon - origin.lon)/mLon);
         float z =  (float)((this.lat - origin.lat)/mLat);
-        return new Godot.Vector2(z, x);
+        return new Godot.Vector3(z, 0, x);
     }
 }

@@ -10,5 +10,5 @@ script = ExtResource("1_lbahe")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.919018, 0.138308, -0.369156, 0.197107, 0.649759, 0.73414, 0.3414, -0.747452, 0.569879, 0.0650196, 1.51272, 0.150281)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="cursor" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_03fme")
