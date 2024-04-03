@@ -2,7 +2,7 @@
 using System;
 using System.Numerics;
 
-internal struct LatLon
+public struct LatLon
 {
     const double earthRadius = 6378.137;
     
@@ -39,6 +39,11 @@ internal struct LatLon
     public static LatLon operator -(LatLon left, LatLon right)
     {
         return new LatLon(left.Latitude - right.Latitude, left.Longitude - right.Longitude);
+    }
+
+    public override string ToString()
+    {
+        return $"[{this.lat}, {this.lon}]";
     }
 
     public double DistanceTo_M(LatLon x)

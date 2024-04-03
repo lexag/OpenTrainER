@@ -5,24 +5,18 @@ using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Numerics;
 using Vector3 = Godot.Vector3;
+using System.Linq;
 
-internal class TrackNode
+public class TrackNode : WorldObject
 {
-    LatLon worldCoordinate;
     Dictionary<TrackNode, double> neighbourDistances = new Dictionary<TrackNode, double>();
-    public Node3D physicalNode;
-
-    public LatLon WorldCoordinate { get { return worldCoordinate; } set { worldCoordinate = value; } }
+    public Vector3 tangentVector;
+    
     public Dictionary<TrackNode, double> NeighbourDistances { get { return neighbourDistances; } }
 
-    public Vector3 tangentVector;
+    public TrackNode() : base() { }
+    public TrackNode(LatLon worldCoordinate) : base(worldCoordinate) { }
 
-    public TrackNode(LatLon worldCoordinate)
-    {
-        this.worldCoordinate = worldCoordinate;
-    }
-
-    public TrackNode() { }
 
     public void AddNeighbour(TrackNode neighbour)
     {
@@ -34,8 +28,16 @@ internal class TrackNode
         neighbour.AddNeighbour(this);
     }
 
-    public Vector3 recalculateTangent()
+    public Vector3 RecalculateTangent()
     {
+        if (neighbourDistances.Count == 1)
+        {
+            tangentVector = (neighbourDistances.Keys.Single().localCoordinate - this.localCoordinate).Normalized();
+            GD.Print(tangentVector);
+            return tangentVector;
+        }
+
+
         // Find two furthest neighbours with at least 90 deg separation
         double distanceRecord = 100000;
         Tuple<TrackNode, TrackNode> recordHolder = null;
@@ -43,9 +45,9 @@ internal class TrackNode
         {
             foreach (TrackNode b in neighbourDistances.Keys)
             {
-                double distance = a.physicalNode.Position.DistanceTo(b.physicalNode.Position);
-                if (a != b 
-                    && (a.physicalNode.Position - this.physicalNode.Position).AngleTo(this.physicalNode.Position - b.physicalNode.Position) < Mathf.Pi/2
+                double distance = a.localCoordinate.DistanceTo(b.localCoordinate);
+                if (a != b
+                    && (a.localCoordinate - this.localCoordinate).AngleTo(this.localCoordinate - b.localCoordinate) < Mathf.Pi/2
                     && distance < distanceRecord)
                 {
                     distanceRecord = distance;
@@ -53,13 +55,18 @@ internal class TrackNode
                 }
             }
         }
-        Vector3 nextPosition = recordHolder.Item1.physicalNode.Position;
-        Vector3 thisPosition = this.physicalNode.Position;
-        Vector3 prevPosition = recordHolder.Item2.physicalNode.Position;
+        Vector3 nextPosition = recordHolder.Item1.localCoordinate;
+        Vector3 thisPosition = this.localCoordinate;
+        Vector3 prevPosition = recordHolder.Item2.localCoordinate;
 
         // Find circle through 3 point (https://math.stackexchange.com/a/3503338)
         Vector3 w = (prevPosition - nextPosition) / (thisPosition - nextPosition);
-
+        
+        // test
+        tangentVector = (nextPosition - prevPosition).Normalized();
+        return tangentVector;
+        
+            
         if (Math.Abs(w.Z) <= 0.0000001)
         {
             tangentVector = (nextPosition - prevPosition).Normalized();

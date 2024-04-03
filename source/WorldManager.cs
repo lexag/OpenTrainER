@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-partial class WorldManager : Node3D
+public partial class WorldManager : Node3D
 {
     public List<TrackNode> trackNodes = new List<TrackNode>();
 
@@ -22,13 +22,13 @@ partial class WorldManager : Node3D
 
     public void NetworkingDone()
     {
-        SetProcess(true);
-
         WorldRenderer.worldRoot = this;
         WorldRenderer.InstanceTrack(trackNodes);
 
         VehicleManager.worldManager = this;
         VehicleManager.Startup();
+
+        SetProcess(true);
     }
 
     public override void _Process(double delta)

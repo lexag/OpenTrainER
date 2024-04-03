@@ -26,7 +26,7 @@ partial class WorldLoader : Node3D
 	}
 
 
-	private void LoadMapData(KeyValuePair<string, string>[] searchTerms, string objectType = "way", int distance = 1500)
+	private void LoadMapData(KeyValuePair<string, string>[] searchTerms, string objectType = "way", int distance = 300)
 	{
 		LatLon neCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(distance, distance);
 		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(-distance, -distance);

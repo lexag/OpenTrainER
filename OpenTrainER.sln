@@ -1,12 +1,18 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTrainER", "OpenTrainER.csproj", "{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}"
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTrainER", "OpenTrainER.csproj", "{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTrainER-Tests", "..\OpenTrainER-Tests\OpenTrainER-Tests.csproj", "{E35524A0-F461-4B33-8693-88EB606A1988}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-	Debug|Any CPU = Debug|Any CPU
-	ExportDebug|Any CPU = ExportDebug|Any CPU
-	ExportRelease|Any CPU = ExportRelease|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -15,5 +21,18 @@ Global
 		{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}.Release|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{18F6311C-02F7-444D-ADD6-4BFA0D31C0B8}.Release|Any CPU.Build.0 = ExportRelease|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E35524A0-F461-4B33-8693-88EB606A1988}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
