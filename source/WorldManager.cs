@@ -24,7 +24,7 @@ public partial class WorldManager : Node3D
 	public void NetworkingDone()
 	{
 		WorldRenderer.worldRoot = this;
-		WorldRenderer.InstanceTrack(trackNodes);
+		WorldRenderer.RenderNodeset(trackNodes);
 
 		VehicleManager.worldManager = this;
 		VehicleManager.Startup();
@@ -36,6 +36,7 @@ public partial class WorldManager : Node3D
 	{
 		base._Process(delta);
 		VehicleManager.Tick(delta);
+		WorldRenderer.RenderTick();
 		if (WorldRenderer.flagRequestingWorldLoad)
 		{
 			WorldRenderer.flagRequestingWorldLoad = false;

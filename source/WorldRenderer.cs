@@ -8,12 +8,15 @@ static internal class WorldRenderer
 {
 	internal static List<WorldObject> worldObjects = new List<WorldObject>();
 
+	static List<TrackNode> nodesQueuedForInstancing = new List<TrackNode>();
+
 	public static Node3D worldRoot = null;
 
 	public static bool flagRequestingWorldLoad = false;
 	static WorldObject loadSphere = new WorldObject();
 
-	public static void InstanceTrack(List<TrackNode> trackNodes)
+
+	public static void RenderNodeset(List<TrackNode> trackNodes)
 	{
 		loadSphere = new WorldObject();
 		worldObjects.Add(loadSphere);
@@ -34,20 +37,34 @@ static internal class WorldRenderer
 			if (!node.isInstanced)
 			{
 				InstanceTrackNode(node);
+				QueueTrackNodeForSegmentInstancing(node);
 			}
 		}
 		foreach (var node in trackNodes)
 		{
 			node.RecalculateTangent();
 		}
-		foreach (var node in trackNodes)
+	}
+
+	public static void QueueTrackNodeForSegmentInstancing(TrackNode trackNode)
+	{
+		nodesQueuedForInstancing.Add(trackNode);
+	}
+
+
+	public static void RenderTick()
+	{
+		if (nodesQueuedForInstancing.Count > 0)
 		{
-			foreach (var neighbour in node.NeighbourDistances)
+			TrackNode trackNode = nodesQueuedForInstancing[0];
+			nodesQueuedForInstancing.RemoveAt(0);
+
+			foreach (var neighbour in trackNode.NeighbourDistances)
 			{
-				InstanceTrackSegment(node, neighbour.Key);
+				InstanceTrackSegment(trackNode, neighbour.Key);
 			}
 		}
-	}
+    }
 
 	static void ExitedLoadSphere(Area3D area)
 	{
