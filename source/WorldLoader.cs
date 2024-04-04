@@ -30,7 +30,7 @@ partial class WorldLoader : Node3D
 			new Tuple<string, string, string>( "way", "railway", "narrow_gauge" ),
 		};
 
-        int distance = 300;
+        int distance = 1500;
 
         LatLon neCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(distance, distance);
 		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(-distance, -distance);
@@ -54,6 +54,7 @@ partial class WorldLoader : Node3D
 		
 		httpRequest.RequestCompleted += OnOSMRequestCompleted;
 		httpRequest.Request(url, requestData:body);
+		GD.Print("Loading new data");
 
 	}
 
@@ -89,7 +90,7 @@ partial class WorldLoader : Node3D
 					if (j > 0)
 					{
 						trackNodes[nodeRef].AddNeighbour(trackNodes[long.Parse(mapObjectRefNodes[j - 1].Attributes["ref"].Value)]);
-					}
+					}	
 				}
 			}
 		}

@@ -11,6 +11,7 @@ public class TrackNode : WorldObject
 {
     Dictionary<TrackNode, double> neighbourDistances = new Dictionary<TrackNode, double>();
     public Vector3 tangentVector;
+    public bool isInstanced = false;
 
     public Dictionary<TrackNode, double> NeighbourDistances { get { return neighbourDistances; } }
 

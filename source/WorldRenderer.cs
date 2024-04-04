@@ -10,11 +10,31 @@ static internal class WorldRenderer
 
 	public static Node3D worldRoot = null;
 
+	public static bool flagRequestingWorldLoad = false;
+	static WorldObject loadSphere = new WorldObject();
+
 	public static void InstanceTrack(List<TrackNode> trackNodes)
 	{
+		loadSphere = new WorldObject();
+		worldObjects.Add(loadSphere);
+
+		Area3D loadSphereArea = new Area3D();
+		worldRoot.AddChild(loadSphereArea);
+		loadSphere.physicalNode = loadSphereArea;
+
+		CollisionShape3D loadSphereShape = new CollisionShape3D();
+		loadSphereShape.Shape = new SphereShape3D();
+		((SphereShape3D)loadSphereShape.Shape).Radius = 1000;
+		loadSphereArea.AddChild(loadSphereShape);
+
+		loadSphereArea.AreaExited += ExitedLoadSphere;
+
 		foreach (var node in trackNodes)
 		{
-			InstanceTrackNode(node);
+			if (!node.isInstanced)
+			{
+				InstanceTrackNode(node);
+			}
 		}
 		foreach (var node in trackNodes)
 		{
@@ -26,6 +46,17 @@ static internal class WorldRenderer
 			{
 				InstanceTrackSegment(node, neighbour.Key);
 			}
+		}
+	}
+
+	static void ExitedLoadSphere(Area3D area)
+	{
+		if (area.GetParent().Name == "cursor")
+		{
+			flagRequestingWorldLoad = true;
+			loadSphere.physicalNode.QueueFree();
+			worldObjects.Remove(loadSphere);
+			
 		}
 	}
 
@@ -48,6 +79,7 @@ static internal class WorldRenderer
 		sprite.RotateX(Mathf.Pi / 2);
 
 		worldObjects.Add(trackNode);
+		trackNode.isInstanced = true;
 	}
 
 	static void InstanceTrackSegment(TrackNode a, TrackNode b)

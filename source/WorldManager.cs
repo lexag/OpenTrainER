@@ -7,12 +7,13 @@ public partial class WorldManager : Node3D
 {
 	public List<TrackNode> trackNodes = new List<TrackNode>();
 
+	WorldLoader worldLoader = new WorldLoader();
+
 	public override void _Ready()
 	{
 		base._Ready();
 		SetProcess(false);
 
-		WorldLoader worldLoader = new WorldLoader();
 		worldLoader.worldManager = this;
 		AddChild(worldLoader);
 		worldLoader.Load();
@@ -35,6 +36,11 @@ public partial class WorldManager : Node3D
 	{
 		base._Process(delta);
 		VehicleManager.Tick(delta);
+		if (WorldRenderer.flagRequestingWorldLoad)
+		{
+			WorldRenderer.flagRequestingWorldLoad = false;
+			worldLoader.Load();
+		}
 	}
 }
 

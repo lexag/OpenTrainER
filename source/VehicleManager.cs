@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public static class VehicleManager
 {
-	public static LatLon vehicleWorldCoordinate = new LatLon(59.38791, 18.04446);
+	public static LatLon vehicleWorldCoordinate = new LatLon(59.52852, 18.07625);
 
 	public static WorldManager worldManager;
 	
@@ -18,7 +18,7 @@ public static class VehicleManager
 	static Vector3 travelDirection = new Vector3();
 	static Vector3 cameraLookTarget = new Vector3();
 
-	static float speed = 5f;
+	static float speed = 50f;
 	static double distanceAlongTrackSegment = 0;
 	static double fractionAlongTrackSegment = 0;
 	static double currentSegmentLength;
@@ -31,7 +31,7 @@ public static class VehicleManager
 		camera = new Camera3D();
 		worldManager.AddChild(camera);
 		camera.Current = true;
-		camera.Position = new Vector3(0, 15, 0);
+		camera.Position = new Vector3(0, 3, 0);
 		camera.Fov = 60;
 		//camera.RotateX(Mathf.Pi / 2);
 		//camera.LookAt(new Vector3(0.001f, 0, 0));
@@ -59,7 +59,7 @@ public static class VehicleManager
 		{
 			TrackNodeStepover();
 		}
-		vehicleWorldCoordinate = vehicleWorldCoordinate.Moved_M(deltaTravel.Y, deltaTravel.X);
+		vehicleWorldCoordinate = vehicleWorldCoordinate.Moved_M(deltaTravel.X, deltaTravel.Z);
 		WorldRenderer.MoveWorld(actualPositionDelta);
 
 		travelDirection = TrackInterpolation.GetForwardVectorFromKey(currentTrackNode, targetTrackNode, (float)fractionAlongTrackSegment);// + (targetTrackNode.physicalNode.Position - vehicleCursor.Position).Normalized();
@@ -70,13 +70,13 @@ public static class VehicleManager
 			cameraLookTarget += (camera.Position + travelDirection * 100) * 0.01f;
 			cameraLookTarget /= 1.01f;
 		}
-		else if (angleDiff > Math.PI / 3)
+		else if (angleDiff > Math.PI / 4)
 		{
 			cameraLookTarget = camera.Position + travelDirection * 100;
         }
 
 		// Debug
-		cameraLookTarget = camera.Position + Vector3.Down * 1000 + Vector3.Forward;
+		//cameraLookTarget = camera.Position + Vector3.Down * 1000 + Vector3.Forward;
 
 		camera.LookAt(cameraLookTarget);
 	}
