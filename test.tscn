@@ -1,8 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://bdxmg8idyjt2r"]
+[gd_scene load_steps=7 format=3 uid="uid://bdxmg8idyjt2r"]
 
 [ext_resource type="Script" path="res://source/WorldManager.cs" id="1_lbahe"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8tuwg"]
+albedo_color = Color(0.305882, 0.305882, 0.305882, 1)
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_gk0qn"]
+material = SubResource("StandardMaterial3D_8tuwg")
 size = Vector2(100, 100)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4flxl"]

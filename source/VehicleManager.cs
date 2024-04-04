@@ -31,7 +31,7 @@ public static class VehicleManager
 		camera = new Camera3D();
 		worldManager.AddChild(camera);
 		camera.Current = true;
-		camera.Position = new Vector3(0, 2, 0);
+		camera.Position = new Vector3(0, 15, 0);
 		camera.Fov = 60;
 		//camera.RotateX(Mathf.Pi / 2);
 		//camera.LookAt(new Vector3(0.001f, 0, 0));
@@ -74,9 +74,9 @@ public static class VehicleManager
 		{
 			cameraLookTarget = camera.Position + travelDirection * 100;
         }
-		
+
 		// Debug
-		//cameraLookTarget = camera.Position + Vector3.Down * 1000 + Vector3.Forward;
+		cameraLookTarget = camera.Position + Vector3.Down * 1000 + Vector3.Forward;
 
 		camera.LookAt(cameraLookTarget);
 	}

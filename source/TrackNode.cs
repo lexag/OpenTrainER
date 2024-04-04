@@ -11,7 +11,7 @@ public class TrackNode : WorldObject
 {
     Dictionary<TrackNode, double> neighbourDistances = new Dictionary<TrackNode, double>();
     public Vector3 tangentVector;
-    
+
     public Dictionary<TrackNode, double> NeighbourDistances { get { return neighbourDistances; } }
 
     public TrackNode() : base() { }
@@ -47,7 +47,7 @@ public class TrackNode : WorldObject
             {
                 double distance = a.localCoordinate.DistanceTo(b.localCoordinate);
                 if (a != b
-                    && (a.localCoordinate - this.localCoordinate).AngleTo(this.localCoordinate - b.localCoordinate) < Mathf.Pi/2
+                    && (a.localCoordinate - this.localCoordinate).AngleTo(this.localCoordinate - b.localCoordinate) < Mathf.Pi / 2
                     && distance < distanceRecord)
                 {
                     distanceRecord = distance;
@@ -61,27 +61,48 @@ public class TrackNode : WorldObject
 
         // Find circle through 3 point (https://math.stackexchange.com/a/3503338)
         Vector3 w = (prevPosition - nextPosition) / (thisPosition - nextPosition);
-        
-        // test
+
         tangentVector = (nextPosition - prevPosition).Normalized();
         return tangentVector;
+
+
+        Vector3 bisectorA = prevPosition.DirectionTo(thisPosition).Cross(Vector3.Up);
+        Vector3 p1 = (prevPosition + thisPosition) / 2;
+        Vector3 p2 = p1 + bisectorA * 100;
+        Vector3 bisectorB = thisPosition.DirectionTo(nextPosition).Cross(Vector3.Up);
+        Vector3 p3 = (thisPosition + nextPosition) / 2;
+        Vector3 p4 = p2 + bisectorB * 100;
+
+        p1.Y = 0;
+        p2.Y = 0;
+        p3.Y = 0;
+        p4.Y = 0;
+
+        Vector3 center = new Vector3();
+
+        center.X = (p1.X * p2.Z - p1.Z * p2.X) * (p3.X - p4.X) - (p3.X * p4.Z - p3.Z * p4.X) * (p1.X - p2.X);
+        center.Z = (p1.X * p2.Z - p1.Z * p2.X) * (p3.Z - p4.Z) - (p3.X * p4.Z - p3.Z * p4.X) * (p1.Z - p2.Z);
+
+        center /= (p1.X - p2.X) * (p3.Z - p4.Z) - (p3.X - p4.X) * (p1.Z - p2.Z);
+
+        tangentVector = (center - thisPosition).Cross(Vector3.Down).Normalized();
+        // CONTINUE HERE
+        return tangentVector;
         
-            
         if (Math.Abs(w.Z) <= 0.0000001)
         {
             tangentVector = (nextPosition - prevPosition).Normalized();
 
         }
 
-        Vector3 center = (thisPosition - nextPosition) * (w - new Vector3(Mathf.Pow(w.Length(), 2), 0, 0)) / (-2 * w.Z) + nextPosition;
+        center = (thisPosition - nextPosition) * (w - new Vector3(Mathf.Pow(w.Length(), 2), 0, 0)) / (-2 * w.Z) + nextPosition;
         double radius = (nextPosition - center).Length();
 
-        tangentVector = (center - thisPosition).Rotated(Vector3.Down, Mathf.Pi / 2);
         // Find tangent of circle at point
         if (tangentVector.AngleTo(thisPosition - nextPosition) > Mathf.Pi / 2)
         {
             tangentVector *= -1;
-        }       
+        }
         tangentVector = tangentVector.Normalized();
         return tangentVector;
     }
