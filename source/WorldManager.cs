@@ -1,40 +1,40 @@
-﻿using Godot;
+using Godot;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
 public partial class WorldManager : Node3D
 {
-    public List<TrackNode> trackNodes = new List<TrackNode>();
+	public List<TrackNode> trackNodes = new List<TrackNode>();
 
-    public override void _Ready()
-    {
-        base._Ready();
-        SetProcess(false);
+	public override void _Ready()
+	{
+		base._Ready();
+		SetProcess(false);
 
-        WorldLoader worldLoader = new WorldLoader();
-        worldLoader.worldManager = this;
-        AddChild(worldLoader);
-        worldLoader.Load();
-        
-        // Awaits NetworkingDone call from worldLoader.
-    }
+		WorldLoader worldLoader = new WorldLoader();
+		worldLoader.worldManager = this;
+		AddChild(worldLoader);
+		worldLoader.Load();
+		
+		// Awaits NetworkingDone call from worldLoader.
+	}
 
-    public void NetworkingDone()
-    {
-        WorldRenderer.worldRoot = this;
-        WorldRenderer.InstanceTrack(trackNodes);
+	public void NetworkingDone()
+	{
+		WorldRenderer.worldRoot = this;
+		WorldRenderer.InstanceTrack(trackNodes);
 
-        VehicleManager.worldManager = this;
-        VehicleManager.Startup();
+		VehicleManager.worldManager = this;
+		VehicleManager.Startup();
 
-        SetProcess(true);
-    }
+		SetProcess(true);
+	}
 
-    public override void _Process(double delta)
-    {
-        base._Process(delta);
-        VehicleManager.Tick(delta);
-    }
+	public override void _Process(double delta)
+	{
+		base._Process(delta);
+		VehicleManager.Tick(delta);
+	}
 }
 

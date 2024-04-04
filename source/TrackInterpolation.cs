@@ -100,13 +100,15 @@ public static class TrackInterpolation
 			return ResampleFloatArray(SampleEquidistantKeys(a, b, 100), numPoints);
 		}
 
+
 		// (https://gamedev.stackexchange.com/a/5427)
+		const int sampleResolution = 100;
 		Vector3 origin = a.LocalCoordinate;
 		float clen = 0;
-		float[] arcLengths = new float[numPoints+1];
-		for (var i = 1; i < numPoints+1; i += 1)
+		float[] arcLengths = new float[sampleResolution];
+		for (var i = 1; i < sampleResolution; i += 1)
 		{
-			Vector3 p = GetPositionFromKey(a, b, i * 1f / numPoints);
+			Vector3 p = GetPositionFromKey(a, b, i * 1f / sampleResolution);
 			Vector3 delta = origin - p;
 			clen += delta.Length();
 			arcLengths[i] = clen;
@@ -115,11 +117,11 @@ public static class TrackInterpolation
 
 		int n = 0;
 		float[] list = new float[numPoints];
-		float totalLength = arcLengths[numPoints - 1];
+		float totalLength = arcLengths[sampleResolution-1];
 
-        for (float targetLength = 0; targetLength <= totalLength && n < numPoints; targetLength += totalLength / numPoints)
+		for (float targetLength = 0; targetLength <= totalLength + arcLengths[0] && n < numPoints; targetLength += totalLength / numPoints)
 		{
-			float low = 0, high = numPoints;
+			float low = 0, high = sampleResolution;
 			int index = 0;
 			while (low < high)
 			{
@@ -148,32 +150,32 @@ public static class TrackInterpolation
 			}
 			else
 			{
-				list[n] = (float)(index + (float)(targetLength - lengthBefore) / (arcLengths[index + 1] - lengthBefore)) / numPoints;
+				list[n] = (float)(index + (float)(targetLength - lengthBefore) / (arcLengths[index + 1] - lengthBefore)) / sampleResolution;
 			}
 			n++;
 		}
 
 		return list;
 
-        //float[] list = new float[numPoints];
+		//float[] list = new float[numPoints];
 
-        //float distance = (float)GetLengthOfSegment(a, b);
-        //float actualSegmentLength = distance / (numPoints - 1);
+		//float distance = (float)GetLengthOfSegment(a, b);
+		//float actualSegmentLength = distance / (numPoints - 1);
 
-        //list[0] = 0;
-        //float t = 0;
-        //for (int i = 1; i < numPoints - 1; i++)
-        //{
-        //	Vector3 cursor = GetPositionFromKey(a, b, t);
-        //	Vector3 direction = GetForwardVectorFromKey(a, b, t).Normalized();
-        //	cursor += direction * actualSegmentLength;
-        //	t = GetClosestKey(a, b, cursor, 0.1f/numPoints);
+		//list[0] = 0;
+		//float t = 0;
+		//for (int i = 1; i < numPoints - 1; i++)
+		//{
+		//	Vector3 cursor = GetPositionFromKey(a, b, t);
+		//	Vector3 direction = GetForwardVectorFromKey(a, b, t).Normalized();
+		//	cursor += direction * actualSegmentLength;
+		//	t = GetClosestKey(a, b, cursor, 0.1f/numPoints);
 
-        //	list[i] = t;
-        //}
-        //list[numPoints - 1] = 1;
-        //return list;
-    }
+		//	list[i] = t;
+		//}
+		//list[numPoints - 1] = 1;
+		//return list;
+	}
 
 
 
