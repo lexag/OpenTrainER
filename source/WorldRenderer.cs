@@ -63,32 +63,32 @@ static internal class WorldRenderer
 		{
 			float t = keysAlongSegment[i];
 			cursor = TrackInterpolation.GetPositionFromKey(a, b, t);
-            Vector3 nextCursor = TrackInterpolation.GetPositionFromKey(a, b, keysAlongSegment[i + 1]);
+			Vector3 nextCursor = TrackInterpolation.GetPositionFromKey(a, b, keysAlongSegment[i + 1]);
 
 			SpawnTrackMesh(a, cursor, nextCursor);
 		}
-        SpawnTrackMesh(a, cursor, b.LocalCoordinate);
-    }
+		SpawnTrackMesh(a, cursor, b.LocalCoordinate);
+	}
 
 	static void SpawnTrackMesh(TrackNode ownerNode, Vector3 position, Vector3 target)
 	{
-        Vector3 forwardVector = position.DirectionTo(target);
-        Vector3 sideVector = Vector3.Up.Cross(forwardVector).Normalized();
-        Vector3 railSideOffset = sideVector * 1.435f / 2;
+		Vector3 forwardVector = position.DirectionTo(target);
+		Vector3 sideVector = Vector3.Up.Cross(forwardVector).Normalized();
+		Vector3 railSideOffset = sideVector * 1.435f / 2;
 
-        position += railSideOffset;
-        target += railSideOffset;
+		position += railSideOffset;
+		target += railSideOffset;
 
-        float actualSegmentLength = position.DistanceTo(target);
+		float actualSegmentLength = position.DistanceTo(target);
 
-        MeshInstance3D meshInstance = new MeshInstance3D();
-        ownerNode.physicalNode.AddChild(meshInstance);
-        meshInstance.Mesh = (Mesh)GD.Load("res://SandboxMeshes/TrackCube.obj");
-        meshInstance.GlobalPosition = position;
-        meshInstance.Scale = new Vector3(actualSegmentLength + 0.1f, 0.1f, 0.1f);
-        meshInstance.LookAt(target);
-        meshInstance.RotateY(Mathf.Pi / 2);
-    }
+		MeshInstance3D meshInstance = new MeshInstance3D();
+		ownerNode.physicalNode.AddChild(meshInstance);
+		meshInstance.Mesh = (Mesh)GD.Load("res://assets/track/TrackCube.obj");
+		meshInstance.GlobalPosition = position;
+		meshInstance.Scale = new Vector3(actualSegmentLength + 0.05f, 0.1f, 0.05f);
+		meshInstance.LookAt(target);
+		meshInstance.RotateY(Mathf.Pi / 2);
+	}
 
 	public static void MoveWorld(Vector2 deltaTravel)
 	{

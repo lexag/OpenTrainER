@@ -19,22 +19,26 @@ partial class WorldLoader : Node3D
 
 	public void Load()
 	{
-		LoadMapData(new KeyValuePair<string, string>[] {
-			new KeyValuePair<string, string>( "railway", "rail" ),
-			new KeyValuePair<string, string>( "railway", "narrow_gauge" )
-		});
+		LoadMapData();
 	}
 
 
-	private void LoadMapData(KeyValuePair<string, string>[] searchTerms, string objectType = "way", int distance = 300)
+	private void LoadMapData()
 	{
-		LatLon neCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(distance, distance);
+		Tuple<string, string, string>[] searchTerms = new Tuple<string, string, string>[] {
+			new Tuple<string, string, string>( "way", "railway", "rail" ),
+			new Tuple<string, string, string>( "way", "railway", "narrow_gauge" ),
+		};
+
+        int distance = 300;
+
+        LatLon neCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(distance, distance);
 		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(-distance, -distance);
 		string payload = $"[out:xml];(";
 		
 		foreach (var entry in searchTerms)
 		{
-			payload += $"{objectType}[{'"'}{entry.Key}{'"'}={'"'}{entry.Value}{'"'}](" +
+			payload += $"{entry.Item1}[{'"'}{entry.Item2}{'"'}={'"'}{entry.Item3}{'"'}](" +
 				$"{swCorner.Latitude.ToString().Replace(',','.')}," +
 				$"{swCorner.Longitude.ToString().Replace(',', '.')}," +
 				$"{neCorner.Latitude.ToString().Replace(',', '.')}," +
@@ -61,20 +65,20 @@ partial class WorldLoader : Node3D
 		int c = doc.DocumentElement.ChildNodes.Count;
 		for (int i = 0; i<c; i++)
 		{
-			XmlNode node = doc.DocumentElement.ChildNodes[i];
-			if (node.Name == "way")
+			XmlNode mapObject = doc.DocumentElement.ChildNodes[i];
+			if (mapObject.Name == "way")
 			{
-				List<XmlNode> trackNodeRefNodes = new List<XmlNode>();
-				foreach (XmlNode node2 in node.ChildNodes)
+				List<XmlNode> mapObjectRefNodes = new List<XmlNode>();
+				foreach (XmlNode mapObjectComponent in mapObject.ChildNodes)
 				{
-					if (node2.Name == "nd")
+					if (mapObjectComponent.Name == "nd")
 					{
-						trackNodeRefNodes.Add(node2);
+						mapObjectRefNodes.Add(mapObjectComponent);
 					}
 				}
-				for (int j = 0; j < trackNodeRefNodes.Count; j++)
+				for (int j = 0; j < mapObjectRefNodes.Count; j++)
 				{
-					XmlNode current = trackNodeRefNodes[j];
+					XmlNode current = mapObjectRefNodes[j];
 					long nodeRef = long.Parse(current.Attributes["ref"].Value);
 					if (!trackNodes.ContainsKey(nodeRef))
 					{
@@ -84,7 +88,7 @@ partial class WorldLoader : Node3D
 					}
 					if (j > 0)
 					{
-						trackNodes[nodeRef].AddNeighbour(trackNodes[long.Parse(trackNodeRefNodes[j - 1].Attributes["ref"].Value)]);
+						trackNodes[nodeRef].AddNeighbour(trackNodes[long.Parse(mapObjectRefNodes[j - 1].Attributes["ref"].Value)]);
 					}
 				}
 			}

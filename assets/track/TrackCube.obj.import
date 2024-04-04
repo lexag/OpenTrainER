@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://76l1e0pwyqox"
+path="res://.godot/imported/TrackCube.obj-198d1e91bb7b9114ffc57e8c67173b6e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/TrackCube.obj-198d1e91bb7b9114ffc57e8c67173b6e.mesh"]
+
+source_file="res://assets/track/TrackCube.obj"
+dest_files=["res://.godot/imported/TrackCube.obj-198d1e91bb7b9114ffc57e8c67173b6e.mesh", "res://.godot/imported/TrackCube.obj-198d1e91bb7b9114ffc57e8c67173b6e.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false
