@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public static class VehicleManager
 {
-	public static LatLon vehicleWorldCoordinate = new LatLon(59.52852, 18.07625);
+	public static LatLon vehicleWorldCoordinate = new LatLon(59.382871477434364, 18.04255991879207);
 
 	public static WorldManager worldManager;
 	
@@ -18,7 +18,7 @@ public static class VehicleManager
 	static Vector3 travelDirection = new Vector3();
 	static Vector3 cameraLookTarget = new Vector3();
 
-	static float speed = 50f;
+	static float speed = 5f;
 	static double distanceAlongTrackSegment = 0;
 	static double fractionAlongTrackSegment = 0;
 	static double currentSegmentLength;

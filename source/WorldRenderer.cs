@@ -3,6 +3,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 
 static internal class WorldRenderer
 {
@@ -64,7 +65,7 @@ static internal class WorldRenderer
 				InstanceTrackSegment(trackNode, neighbour.Key);
 			}
 		}
-    }
+	}
 
 	static void ExitedLoadSphere(Area3D area)
 	{
@@ -150,6 +151,37 @@ static internal class WorldRenderer
 	public static void MoveWorld(Vector3 deltaTravel)
 	{
 		MoveWorld(new Vector2(deltaTravel.X, deltaTravel.Z));
+	}
+
+
+	public static void LoadTracksideScene(string region, string identifier)
+	{
+		GltfDocument gltfLoadDocument = new GltfDocument();
+		GltfState gltfLoadState = new GltfState();
+		Error error = gltfLoadDocument.AppendFromFile($"res://assets/route/{region}/{identifier}.glb", gltfLoadState);
+		if (error.Equals(Error.Ok))
+		{
+			string[] sceneData = File.ReadAllLines(ProjectSettings.GlobalizePath($"res://assets/route/{region}/{identifier}.dat"));
+			
+			Node3D gltfSceneRootNode = (Node3D)gltfLoadDocument.GenerateScene(gltfLoadState);
+
+			worldRoot.AddChild(gltfSceneRootNode);
+
+			WorldObject wo = new WorldObject();
+			wo.physicalNode = gltfSceneRootNode;
+			wo.LocalCoordinate = (new LatLon(double.Parse(sceneData[0].Trim().Replace('.',',')), double.Parse(sceneData[1].Trim().Replace('.', ',')))).ToLocal_M(VehicleManager.vehicleWorldCoordinate);
+			wo.LocalCoordinate += new Vector3(0, float.Parse(sceneData[2].Trim().Replace('.', ',')), 0);
+			gltfSceneRootNode.Scale = new Vector3(1, 1, 1);
+			gltfSceneRootNode.RotateY(-Mathf.Pi / 2);
+			//gltfSceneRootNode.RotateX(Mathf.Pi / 2);
+			//gltfSceneRootNode.RotateX(Mathf.Pi);
+			//gltfSceneRootNode.RotateZ(Mathf.Pi);
+			worldObjects.Add(wo);
+		}
+		else
+		{
+			GD.PrintErr($"Couldn't load glTF scene (error code: {error}).");
+		}
 	}
 }
 

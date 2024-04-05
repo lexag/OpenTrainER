@@ -30,7 +30,7 @@ partial class WorldLoader : Node3D
 			new Tuple<string, string, string>( "way", "railway", "narrow_gauge" ),
 		};
 
-        int distance = 1500;
+        int distance = 500;
 
         LatLon neCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(distance, distance);
 		LatLon swCorner = VehicleManager.vehicleWorldCoordinate.Moved_M(-distance, -distance);

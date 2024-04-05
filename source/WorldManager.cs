@@ -25,6 +25,7 @@ public partial class WorldManager : Node3D
 	{
 		WorldRenderer.worldRoot = this;
 		WorldRenderer.RenderNodeset(trackNodes);
+		WorldRenderer.LoadTracksideScene("SE", "Unv-Djo");
 
 		VehicleManager.worldManager = this;
 		VehicleManager.Startup();
