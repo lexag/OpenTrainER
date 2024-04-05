@@ -3,3 +3,6 @@
 
 # Visual Studio ignores
 .vs/
+
+# Project ignores
+assets/route/
