@@ -1,0 +1,84 @@
+[gd_scene load_steps=3 format=3 uid="uid://chnlqdad8g464"]
+
+[ext_resource type="Script" path="res://source/WorldRoot.cs" id="1_etwmx"]
+[ext_resource type="Script" path="res://source/menu/RouteSelector.cs" id="1_xtqyj"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+script = ExtResource("1_etwmx")
+metadata/idle = true
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+tabs_visible = false
+
+[node name="tab-route_selector" type="HBoxContainer" parent="TabContainer"]
+layout_mode = 2
+focus_mode = 2
+script = ExtResource("1_xtqyj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/tab-route_selector"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/tab-route_selector/VBoxContainer"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="search_box" type="TextEdit" parent="TabContainer/tab-route_selector/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(650, 30)
+layout_mode = 2
+placeholder_text = "Search for Start / Destination"
+scroll_fit_content_height = true
+caret_blink = true
+
+[node name="search_button" type="Button" parent="TabContainer/tab-route_selector/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Search"
+
+[node name="routes_list" type="ItemList" parent="TabContainer/tab-route_selector/VBoxContainer"]
+layout_mode = 2
+allow_reselect = true
+auto_height = true
+
+[node name="infobox" type="VBoxContainer" parent="TabContainer/tab-route_selector"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="route_name" type="Label" parent="TabContainer/tab-route_selector/infobox"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+focus_mode = 2
+
+[node name="route_from" type="Label" parent="TabContainer/tab-route_selector/infobox"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="route_to" type="Label" parent="TabContainer/tab-route_selector/infobox"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="route_duration" type="Label" parent="TabContainer/tab-route_selector/infobox"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="reverse_toggle" type="CheckButton" parent="TabContainer/tab-route_selector/infobox"]
+layout_mode = 2
+text = "Run in reverse"
+
+[node name="continue_button" type="Button" parent="TabContainer/tab-route_selector/infobox"]
+layout_mode = 2
+disabled = true
+text = "Continue"

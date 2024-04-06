@@ -3,39 +3,41 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-public partial class WorldManager : Node3D
+public enum WorldManagerMode
 {
-	public List<TrackNode> trackNodes = new List<TrackNode>();
+	World,
+	Menu
+}
 
-	WorldLoader worldLoader = new WorldLoader();
+public static class WorldManager
+{
+	public static List<TrackNode> trackNodes = new List<TrackNode>();
 
-	public override void _Ready()
+	public static Node worldRoot = null;
+	static WorldLoader worldLoader = new WorldLoader();
+
+
+	public static void Setup()
 	{
-		base._Ready();
-		SetProcess(false);
-
-		worldLoader.worldManager = this;
-		AddChild(worldLoader);
+		worldRoot.SetProcess(false);
+		worldRoot.AddChild(worldLoader);
 		worldLoader.Load();
 		
 		// Awaits NetworkingDone call from worldLoader.
 	}
 
-	public void NetworkingDone()
+	public static void NetworkingDone()
 	{
-		WorldRenderer.worldRoot = this;
 		WorldRenderer.RenderNodeset(trackNodes);
 		WorldRenderer.LoadTracksideScene("SE", "Unv-Djo");
 
-		VehicleManager.worldManager = this;
 		VehicleManager.Startup();
 
-		SetProcess(true);
+		worldRoot.SetProcess(true);
 	}
 
-	public override void _Process(double delta)
+	public static void Tick(double delta)
 	{
-		base._Process(delta);
 		VehicleManager.Tick(delta);
 		WorldRenderer.RenderTick();
 		if (WorldRenderer.flagRequestingWorldLoad)

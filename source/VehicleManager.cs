@@ -11,7 +11,6 @@ public static class VehicleManager
 {
 	public static LatLon vehicleWorldCoordinate = new LatLon(59.382871477434364, 18.04255991879207);
 
-	public static WorldManager worldManager;
 	
 	static TrackNode currentTrackNode;
 	static TrackNode targetTrackNode;
@@ -29,7 +28,7 @@ public static class VehicleManager
 	public static void Startup()
 	{
 		camera = new Camera3D();
-		worldManager.AddChild(camera);
+		WorldManager.worldRoot.AddChild(camera);
 		camera.Current = true;
 		camera.Position = new Vector3(0, 3, 0);
 		camera.Fov = 60;
@@ -37,7 +36,7 @@ public static class VehicleManager
 		//camera.LookAt(new Vector3(0.001f, 0, 0));
 
 		vehicleCursor = new Node3D();
-		worldManager.AddChild(vehicleCursor);
+		WorldManager.worldRoot.AddChild(vehicleCursor);
 
 		SnapToTrackNode();
 	}
@@ -105,8 +104,8 @@ public static class VehicleManager
 	static void SnapToTrackNode()
 	{
 		double distanceRecord = double.MaxValue;
-		TrackNode recordHolder = worldManager.trackNodes[0];
-		foreach (TrackNode trackNode in worldManager.trackNodes)
+		TrackNode recordHolder = WorldManager.trackNodes[0];
+		foreach (TrackNode trackNode in WorldManager.trackNodes)
 		{
 			double d = trackNode.physicalNode.Position.Length();
 			if (d < distanceRecord)
