@@ -11,19 +11,18 @@ static internal class WorldRenderer
 
 	static List<TrackNode> nodesQueuedForInstancing = new List<TrackNode>();
 
-	public static Node3D worldRoot = null;
 
 	public static bool flagRequestingWorldLoad = false;
 	static WorldObject loadSphere = new WorldObject();
 
 
-	public static void RenderNodeset(List<TrackNode> trackNodes)
+	public static void RenderListOfTrackNodes(List<TrackNode> trackNodes)
 	{
 		loadSphere = new WorldObject();
 		worldObjects.Add(loadSphere);
 
 		Area3D loadSphereArea = new Area3D();
-		worldRoot.AddChild(loadSphereArea);
+		WorldManager.worldRoot.AddChild(loadSphereArea);
 		loadSphere.physicalNode = loadSphereArea;
 
 		CollisionShape3D loadSphereShape = new CollisionShape3D();
@@ -85,7 +84,7 @@ static internal class WorldRenderer
 
 		Node3D point = new Node3D();
 		trackNode.physicalNode = point;
-		worldRoot.AddChild(point);
+		WorldManager.worldRoot.AddChild(point);
 		trackNode.LocalCoordinate = localPosition;
 		point.Position = localPosition;
 
@@ -165,7 +164,7 @@ static internal class WorldRenderer
 			
 			Node3D gltfSceneRootNode = (Node3D)gltfLoadDocument.GenerateScene(gltfLoadState);
 
-			worldRoot.AddChild(gltfSceneRootNode);
+			WorldManager.worldRoot.AddChild(gltfSceneRootNode);
 
 			WorldObject wo = new WorldObject();
 			wo.physicalNode = gltfSceneRootNode;

@@ -40,7 +40,7 @@ public class TrackNode : WorldObject
 
 
         // Find two furthest neighbours with at least 90 deg separation
-        double distanceRecord = 100000;
+        double distanceRecord = double.MaxValue;
         Tuple<TrackNode, TrackNode> recordHolder = null;
         foreach (TrackNode a in neighbourDistances.Keys)
         {
@@ -48,7 +48,7 @@ public class TrackNode : WorldObject
             {
                 double distance = a.localCoordinate.DistanceTo(b.localCoordinate);
                 if (a != b
-                    && (a.localCoordinate - this.localCoordinate).AngleTo(this.localCoordinate - b.localCoordinate) < Mathf.Pi / 2
+                    //&& (a.localCoordinate - this.localCoordinate).AngleTo(this.localCoordinate - b.localCoordinate) < Mathf.Pi / 2
                     && distance < distanceRecord)
                 {
                     distanceRecord = distance;

@@ -11,25 +11,12 @@ public enum WorldManagerMode
 
 public static class WorldManager
 {
-	public static List<TrackNode> trackNodes = new List<TrackNode>();
-
 	public static Node worldRoot = null;
-	static WorldLoader worldLoader = new WorldLoader();
-
 
 	public static void Setup()
 	{
-		worldRoot.SetProcess(false);
-		worldRoot.AddChild(worldLoader);
-		worldLoader.Load();
-		
-		// Awaits NetworkingDone call from worldLoader.
-	}
-
-	public static void NetworkingDone()
-	{
-		WorldRenderer.RenderNodeset(trackNodes);
-		WorldRenderer.LoadTracksideScene("SE", "Unv-Djo");
+		WorldRenderer.RenderListOfTrackNodes(RouteManager.trackNodesInRoute.Values.ToList());
+		//WorldRenderer.LoadTracksideScene("SE", "Unv-Djo");
 
 		VehicleManager.Startup();
 
@@ -40,11 +27,6 @@ public static class WorldManager
 	{
 		VehicleManager.Tick(delta);
 		WorldRenderer.RenderTick();
-		if (WorldRenderer.flagRequestingWorldLoad)
-		{
-			WorldRenderer.flagRequestingWorldLoad = false;
-			worldLoader.Load();
-		}
 	}
 }
 

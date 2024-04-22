@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public static class VehicleManager
 {
-	public static LatLon vehicleWorldCoordinate = new LatLon(59.382871477434364, 18.04255991879207);
+	public static LatLon vehicleWorldCoordinate = new LatLon(59.34732744174741, 18.069374291605303);
 
 	
 	static TrackNode currentTrackNode;
@@ -17,7 +17,7 @@ public static class VehicleManager
 	static Vector3 travelDirection = new Vector3();
 	static Vector3 cameraLookTarget = new Vector3();
 
-	static float speed = 5f;
+	static float speed = 30f;
 	static double distanceAlongTrackSegment = 0;
 	static double fractionAlongTrackSegment = 0;
 	static double currentSegmentLength;
@@ -104,8 +104,8 @@ public static class VehicleManager
 	static void SnapToTrackNode()
 	{
 		double distanceRecord = double.MaxValue;
-		TrackNode recordHolder = WorldManager.trackNodes[0];
-		foreach (TrackNode trackNode in WorldManager.trackNodes)
+		TrackNode recordHolder = RouteManager.trackNodesInRoute.Values.ToArray()[0];
+		foreach (TrackNode trackNode in RouteManager.trackNodesInRoute.Values)
 		{
 			double d = trackNode.physicalNode.Position.Length();
 			if (d < distanceRecord)

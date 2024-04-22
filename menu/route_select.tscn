@@ -12,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 2
 script = ExtResource("1_etwmx")
+idle = true
 metadata/idle = true
 
 [node name="TabContainer" type="TabContainer" parent="."]

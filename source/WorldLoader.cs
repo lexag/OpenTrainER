@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
+[Obsolete]
 partial class WorldLoader : Node3D
 {
 	public Dictionary<long, TrackNode> trackNodes = new Dictionary<long, TrackNode>();
@@ -56,6 +57,7 @@ partial class WorldLoader : Node3D
 
 	private void OnOSMRequestCompleted()
 	{
+		GD.Print("Received data");
 		XmlDocument doc = osmQuery.xmlDocument;
 		int c = doc.DocumentElement.ChildNodes.Count;
 		for (int i = 0; i < c; i++)
@@ -88,7 +90,7 @@ partial class WorldLoader : Node3D
 				}
 			}
 		}
-		WorldRenderer.RenderNodeset(trackNodes.Values.ToList<TrackNode>());
-		WorldManager.NetworkingDone();
+		WorldRenderer.RenderListOfTrackNodes(trackNodes.Values.ToList<TrackNode>());
+		//WorldManager.NetworkingDone();
 	}
 }
