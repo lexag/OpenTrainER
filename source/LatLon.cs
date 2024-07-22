@@ -29,6 +29,12 @@ public struct LatLon
         this.lon = lon;
     }
 
+    public LatLon(string lat, string lon)
+    {
+        this.lat = double.Parse(lat.Replace('.', ','));
+        this.lon = double.Parse(lon.Replace('.', ','));
+    }
+
     private Tuple<double, double> DegreesPerMeter(LatLon coordinate) { return new Tuple<double, double>((1 / ((2 * Math.PI / 360) * earthRadius)) / 1000, (1 / ((2 * Math.PI / 360) * earthRadius)) / 1000 / Math.Cos(coordinate.lat * (Math.PI / 180))); }
 
 

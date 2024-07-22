@@ -15,8 +15,9 @@ public static class WorldManager
 
 	public static void Setup()
 	{
+		VehicleManager.vehicleWorldCoordinate = RouteManager.trackNodesInRoute.Last().Value.WorldCoordinate;
 		WorldRenderer.RenderListOfTrackNodes(RouteManager.trackNodesInRoute.Values.ToList());
-		//WorldRenderer.LoadTracksideScene("SE", "Unv-Djo");
+		WorldRenderer.RenderListOfStations(RouteManager.stationsInRoute);
 
 		VehicleManager.Startup();
 

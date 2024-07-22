@@ -14,7 +14,7 @@ internal partial class RouteSelector : Container
     public override void _Ready()
     {
         base._Ready();
-        
+
         ((Button)FindChild("search_button")).Pressed += ButtonSearchPressed;
         ((Button)FindChild("continue_button")).Pressed += ButtonContinuePressed;
         ((ItemList)FindChild("routes_list")).ItemSelected += RouteListClicked;
@@ -47,16 +47,17 @@ internal partial class RouteSelector : Container
 
         string id;
         XmlNode node = osmQuery.GetByXPathSingle("/osm/node[1]");
-        
+
         if (node != null)
         {
             id = node.Attributes.GetNamedItem("id").Value;
         }
-        else{
+        else
+        {
             ((Label)FindChild("route_name")).Text = "Could not find station";
             return;
         }
-        
+
         osmQuery.query = OSMQuery.QuerySpecificId("node", id) + OSMQuery.Query(OSMQuery.WithinRadius(100) + OSMQuery.SpecificKeyValue("route", "train"));
         osmQuery.callback = Callable.From(OSMRouteSearchReturn);
         string q = osmQuery.Run();
@@ -67,7 +68,7 @@ internal partial class RouteSelector : Container
         GD.Print("Searching routes");
 
         availableRoutes = osmQuery.GetByXPath("/osm/relation");
-        
+
         ItemList itemList = (ItemList)FindChild("routes_list");
         itemList.Clear();
 
@@ -75,8 +76,8 @@ internal partial class RouteSelector : Container
         {
             XmlNode node = availableRoutes[i];
             itemList.AddItem(
-                $"{node.SelectSingleNode($"/osm/relation[{i+1}]/tag[@k='from']").Attributes.GetNamedItem("v").Value}" +
-                $" - {node.SelectSingleNode($"/osm/relation[{i+1}]/tag[@k='to']").Attributes.GetNamedItem("v").Value}", selectable: false);
+                $"{node.SelectSingleNode($"/osm/relation[{i + 1}]/tag[@k='from']").Attributes.GetNamedItem("v").Value}" +
+                $" - {node.SelectSingleNode($"/osm/relation[{i + 1}]/tag[@k='to']").Attributes.GetNamedItem("v").Value}", selectable: false);
             itemList.SetItemSelectable(i, true);
         }
     }
@@ -87,7 +88,7 @@ internal partial class RouteSelector : Container
         XmlNode rt = availableRoutes[0];
         XmlNode name;
         name = rt.SelectSingleNode($"/osm/relation[{index + 1}]/tag[@k='name']");
-        if (name == null )
+        if (name == null)
         {
             name = rt.SelectSingleNode($"/osm/relation[{index + 1}]/tag[@k='description']");
         }
@@ -109,9 +110,20 @@ internal partial class RouteSelector : Container
                 OSMQuery.SpecificKeyValue("route", "train") +
                 OSMQuery.SpecificKeyValue("ref", rt.SelectSingleNode($"/osm/relation[{selectedIndex + 1}]/tag[@k='ref']").Attributes.GetNamedItem("v").Value) +
                 OSMQuery.SpecificKeyValue("network", rt.SelectSingleNode($"/osm/relation[{selectedIndex + 1}]/tag[@k='network']").Attributes.GetNamedItem("v").Value)),
-            OSMQuery.Query(
-                OSMQuery.WithinRadius(200)+
-                OSMQuery.SpecificKeyValue("railway", "rail")
+            OSMQuery.Both(OSMQuery.Both(
+                OSMQuery.Query(
+                    OSMQuery.WithinRadius(100) +
+                    OSMQuery.SpecificKeyValue("railway", "narrow_gauge")
+                    ),
+                OSMQuery.Query(
+                    OSMQuery.WithinRadius(100) +
+                    OSMQuery.SpecificKeyValue("railway", "rail")
+                    )
+                ),
+                OSMQuery.Query(
+                    OSMQuery.WithinRadius(10) + 
+                    OSMQuery.SpecificKeyValue("railway", "station")
+                    )
                 )
             );
 

@@ -64,6 +64,11 @@ internal class OSMQuery
 		return $"{first}<recurse type=\"{type}\"/>{second}";
 	}
 
+	public static string Both(string first, string second)
+	{
+		return $"<union>{first}{second}</union>";
+	}
+
 
 	public string Run()
 	{

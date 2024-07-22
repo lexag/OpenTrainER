@@ -116,7 +116,7 @@ public static class VehicleManager
 		}
 		WorldRenderer.MoveWorld(recordHolder.physicalNode.Position);
 		targetTrackNode = recordHolder;
-		currentTrackNode = targetTrackNode;
+		currentTrackNode = recordHolder;
 		TrackNodeStepover();
 	}
 }

@@ -11,27 +11,8 @@ static internal class WorldRenderer
 
 	static List<TrackNode> nodesQueuedForInstancing = new List<TrackNode>();
 
-
-	public static bool flagRequestingWorldLoad = false;
-	static WorldObject loadSphere = new WorldObject();
-
-
 	public static void RenderListOfTrackNodes(List<TrackNode> trackNodes)
 	{
-		loadSphere = new WorldObject();
-		worldObjects.Add(loadSphere);
-
-		Area3D loadSphereArea = new Area3D();
-		WorldManager.worldRoot.AddChild(loadSphereArea);
-		loadSphere.physicalNode = loadSphereArea;
-
-		CollisionShape3D loadSphereShape = new CollisionShape3D();
-		loadSphereShape.Shape = new SphereShape3D();
-		((SphereShape3D)loadSphereShape.Shape).Radius = 1000;
-		loadSphereArea.AddChild(loadSphereShape);
-
-		loadSphereArea.AreaExited += ExitedLoadSphere;
-
 		foreach (var node in trackNodes)
 		{
 			if (!node.isInstanced)
@@ -65,18 +46,6 @@ static internal class WorldRenderer
 			}
 		}
 	}
-
-	static void ExitedLoadSphere(Area3D area)
-	{
-		if (area.GetParent().Name == "cursor")
-		{
-			flagRequestingWorldLoad = true;
-			loadSphere.physicalNode.QueueFree();
-			worldObjects.Remove(loadSphere);
-			
-		}
-	}
-
 
 	static void InstanceTrackNode(TrackNode trackNode)
 	{
@@ -153,34 +122,48 @@ static internal class WorldRenderer
 	}
 
 
-	public static void LoadTracksideScene(string region, string identifier)
+	public static void RenderListOfStations(Dictionary<string, LatLon> stationsInRoute)
+	{
+		foreach (var station in stationsInRoute)
+		{
+			LoadTracksideScene("SE", station.Key, station.Value);
+		}
+	}
+
+	public static void LoadTracksideScene(string region, string identifier, LatLon worldCoordinate)
 	{
 		GltfDocument gltfLoadDocument = new GltfDocument();
 		GltfState gltfLoadState = new GltfState();
-		Error error = gltfLoadDocument.AppendFromFile($"res://assets/route/{region}/{identifier}.glb", gltfLoadState);
-		if (error.Equals(Error.Ok))
+		try
 		{
-			string[] sceneData = File.ReadAllLines(ProjectSettings.GlobalizePath($"res://assets/route/{region}/{identifier}.dat"));
-			
-			Node3D gltfSceneRootNode = (Node3D)gltfLoadDocument.GenerateScene(gltfLoadState);
+			Error error = gltfLoadDocument.AppendFromFile($"res://assets/route/{region}/{identifier}.glb", gltfLoadState);
+			if (error.Equals(Error.Ok))
+			{
+				Node3D gltfSceneRootNode = (Node3D)gltfLoadDocument.GenerateScene(gltfLoadState);
 
-			WorldManager.worldRoot.AddChild(gltfSceneRootNode);
+				WorldManager.worldRoot.AddChild(gltfSceneRootNode);
 
-			WorldObject wo = new WorldObject();
-			wo.physicalNode = gltfSceneRootNode;
-			wo.LocalCoordinate = (new LatLon(double.Parse(sceneData[0].Trim().Replace('.',',')), double.Parse(sceneData[1].Trim().Replace('.', ',')))).ToLocal_M(VehicleManager.vehicleWorldCoordinate);
-			wo.LocalCoordinate += new Vector3(0, float.Parse(sceneData[2].Trim().Replace('.', ',')), 0);
-			gltfSceneRootNode.Scale = new Vector3(1, 1, 1);
-			gltfSceneRootNode.RotateY(-Mathf.Pi / 2);
-			//gltfSceneRootNode.RotateX(Mathf.Pi / 2);
-			//gltfSceneRootNode.RotateX(Mathf.Pi);
-			//gltfSceneRootNode.RotateZ(Mathf.Pi);
-			worldObjects.Add(wo);
+				WorldObject wo = new WorldObject();
+				wo.physicalNode = gltfSceneRootNode;
+				wo.LocalCoordinate = worldCoordinate.ToLocal_M(VehicleManager.vehicleWorldCoordinate);
+				gltfSceneRootNode.Scale = new Vector3(1, 1, 1);
+				gltfSceneRootNode.RotateY(-Mathf.Pi / 2);
+				//gltfSceneRootNode.RotateX(Mathf.Pi / 2);
+				//gltfSceneRootNode.RotateX(Mathf.Pi);
+				//gltfSceneRootNode.RotateZ(Mathf.Pi);
+				worldObjects.Add(wo);
+			}
+			else
+			{
+				GD.PrintErr($"Couldn't load glTF scene (error code: {error}).");
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			GD.PrintErr($"Couldn't load glTF scene (error code: {error}).");
+			GD.PrintErr(ex.ToString());
 		}
 	}
+
+
 }
 
