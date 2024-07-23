@@ -9,11 +9,17 @@ public enum WorldManagerMode
 	Menu
 }
 
+public struct TrackFileStruct
+{
+	public Dictionary<string, TrackPoint> points;
+	public float[] origin;
+}
+
 public struct TrackPoint
 {
 	public double xoffset;
 	public double yoffset;
-	public Dictionary<ulong, TrackPoint> linked_nodes;
+	public Dictionary<string, TrackPoint> linked_nodes;
 	public float[] tangent;
 }
 
@@ -26,7 +32,7 @@ public struct TrackPointLink
 
 public static class WorldManager
 {
-	public static Node worldRoot = null;
+	public static WorldRoot worldRoot = null;
 
 	public static void Setup()
 	{
@@ -53,9 +59,9 @@ public static class WorldManager
 		using (StreamReader r = new StreamReader(Path.Combine(lineFolderPath, "track.json")))
 		{
 			string json = r.ReadToEnd();
-			Dictionary<ulong, TrackPoint> track = JsonConvert.DeserializeObject<Dictionary<ulong, TrackPoint>>(json);
-			//WorldRenderer.RenderTrack(track);
-		}
+			TrackFileStruct track = JsonConvert.DeserializeObject<TrackFileStruct>(json);
+			worldRoot.RenderTrack(track.points);
+        }
 	}
 }
 
