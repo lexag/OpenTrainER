@@ -33,6 +33,7 @@ total_distance = 0
 
 region_data = {}
 region_data["points"] = {}
+region_data["origin"] = [float(args.origin_lat), float(args.origin_lon)]
 
 with open(args.filename, 'r') as f:
 	osm_data = json.load(f)
@@ -59,7 +60,7 @@ with open(args.filename, 'r') as f:
 					neighbour_idx = element["nodes"][i+idx_offset]
 					pos_diff = np.array(
 								[region_data["points"][neighbour_idx]["xoffset"]-point_object["xoffset"], 
-								 region_data["points"][neighbour_idx]["yoffset"]-point_object["yoffset"]])
+									region_data["points"][neighbour_idx]["yoffset"]-point_object["yoffset"]])
 					point_object["linked_nodes"][neighbour_idx] = {
 						"direction": normalize(pos_diff).tolist(),
 						"distance": np.linalg.norm(pos_diff),
@@ -68,7 +69,24 @@ with open(args.filename, 'r') as f:
 					total_distance += np.linalg.norm(pos_diff)
 					num_links += 1
 
+
+# calculate tangent for each node
+for point_id in region_data["points"]:
+	point = region_data["points"][point_id]
+	## Consider each neighbour direction
+	## Flip to between 0 -> pi (eg. 30deg and 210 deg are the same tangent direction)
+	## Average all neigbour directions => tangent direction
+	dir_sum = np.array([0.0, 0.0])
+	for neighbour in point["linked_nodes"]:
+		direction = point["linked_nodes"][neighbour]["direction"].copy()
+		if direction[1] < 0:
+			direction *= np.array([-1, -1])
+			dir_sum += direction
+	tangent = normalize(dir_sum)
+	point["tangent"] = [tangent[0], tangent[1]]
+
+
 	
 with open(args.output, "w") as f:
 	f.write(json.dumps(region_data))
-print(f"Wrote {num_points} points, {num_links} links with length {total_distance} m to {args.output}")
+print(f"Wrote {num_points} points, {num_links} links with length {round(total_distance, 1)} m to {args.output}")
