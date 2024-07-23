@@ -40,17 +40,15 @@ public partial class WorldRoot : Node
             TrackPoint point = trackPoint.Value;
             foreach (var neighbour in point.linked_nodes)
             {
-                // FIXME: adding this check causes every other segment to not render. currently all track renders twice...
-                //if (instancedsegments.contains(neighbour.key + '-' + pointid) || instancedsegments.contains(pointid + '-' + neighbour.key))
-                //{
-                //    continue;
-                //}
+                if (instancedSegments.Contains(neighbour.Key + '-' + pointId) || instancedSegments.Contains(pointId + '-' + neighbour.Key))
+                {
+                    continue;
+                }
                 InstanceTrackSegment(point, trackPoints[neighbour.Key]);
 
-                //instancedSegments.Add(neighbour.Key + '-' + pointId);
-                //instancedSegments.Add(pointId + '-' + neighbour.Key);
+                instancedSegments.Add(neighbour.Key + '-' + pointId);
+                instancedSegments.Add(pointId + '-' + neighbour.Key);
             }
-            //break;
         }
     }
 
