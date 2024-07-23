@@ -88,5 +88,5 @@ for point_id in region_data["points"]:
 
 	
 with open(args.output, "w") as f:
-	f.write(json.dumps(region_data))
+	f.write(json.dumps(region_data, indent=4))
 print(f"Wrote {num_points} points, {num_links} links with length {round(total_distance, 1)} m to {args.output}")
