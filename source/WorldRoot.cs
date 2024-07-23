@@ -40,8 +40,8 @@ public partial class WorldRoot : Node
             TrackPoint point = trackPoint.Value;
             foreach (var neighbour in point.linked_nodes)
             {
-                // FIXME: adding this check causes every other segment to not render. Currently all track renders twice...
-                //if (instancedSegments.Contains(neighbour.Key + '-' + pointId) || instancedSegments.Contains(pointId + '-' + neighbour.Key))
+                // FIXME: adding this check causes every other segment to not render. currently all track renders twice...
+                //if (instancedsegments.contains(neighbour.key + '-' + pointid) || instancedsegments.contains(pointid + '-' + neighbour.key))
                 //{
                 //    continue;
                 //}
@@ -50,6 +50,7 @@ public partial class WorldRoot : Node
                 //instancedSegments.Add(neighbour.Key + '-' + pointId);
                 //instancedSegments.Add(pointId + '-' + neighbour.Key);
             }
+            //break;
         }
     }
 
@@ -84,23 +85,25 @@ public partial class WorldRoot : Node
         aTangent *= abDisplacement.Length() / 2;
         bTangent *= abDisplacement.Length() / 2;
 
-        Vector2[] polygonPoints = { new(-gauge, thickness), new(gauge, thickness), new(gauge, 0), new(-gauge, 0) };
+        //Vector2[] polygonPoints = { new(-gauge, thickness), new(gauge, thickness), new(gauge, 0), new(-gauge, 0) };
+        //polygonPoints = Geometry2D.ConvexHull(polygonPoints);
 
         Path3D path = new Path3D();
         AddChild(path);
         path.Position = new Vector3((float)a.xoffset, 0, (float)a.yoffset);
 
         path.Curve = new Curve3D();
-        path.Curve.AddPoint(Vector3.Zero, -aTangent, aTangent+Vector3.Forward);
+        path.Curve.AddPoint(Vector3.Zero, -aTangent, aTangent);
         path.Curve.AddPoint(abDisplacement, bTangent, -bTangent);
 
         CsgPolygon3D csgPolygon3D = new();
         path.AddChild(csgPolygon3D);
         csgPolygon3D.Mode = CsgPolygon3D.ModeEnum.Path;
         csgPolygon3D.PathNode = path.GetPath();
-        csgPolygon3D.Polygon = polygonPoints;
+        csgPolygon3D.PathLocal = true;
+        //csgPolygon3D.Polygon = polygonPoints;
 
-        GD.Print($"aTangent: {aTangent}, bTangent: {bTangent}, abDisplacement: {abDisplacement}");
+        GD.Print($"a: ({a.xoffset}; {a.yoffset}), b: ({b.xoffset}; {b.yoffset}), aTangent: {aTangent}, bTangent: {bTangent}, abDisplacement: {abDisplacement}, pathPos: {path.Position} == {path.GlobalPosition}");
         return path;
     }
 }
