@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3 uid="uid://1umlw7ie4via"]
+
+[ext_resource type="Script" path="res://source/WorldRoot.cs" id="1_o4af6"]
+[ext_resource type="Texture2D" uid="uid://mlgnf0gihi5n" path="res://icon.svg" id="2_miq24"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0fc8r"]
+sky_top_color = Color(0.25098, 0.384314, 0.666667, 1)
+sky_horizon_color = Color(0.435294, 0.686275, 0.862745, 1)
+sky_curve = 0.0630672
+ground_bottom_color = Color(0.160784, 0.137255, 0.105882, 1)
+ground_horizon_color = Color(0.564706, 0.690196, 0.623529, 1)
+sun_angle_max = 44.3
+
+[sub_resource type="Sky" id="Sky_x1hch"]
+sky_material = SubResource("ProceduralSkyMaterial_0fc8r")
+
+[sub_resource type="Environment" id="Environment_ms257"]
+background_mode = 2
+sky = SubResource("Sky_x1hch")
+sky_custom_fov = 59.2
+ssr_enabled = true
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_o4af6")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 416)
+texture = ExtResource("2_miq24")
+
+[node name="Sprite3D2" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.44, 0, 385)
+texture = ExtResource("2_miq24")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.919018, 0.138308, -0.369156, 0.197107, 0.649759, 0.73414, 0.3414, -0.747452, 0.569879, 0.0650196, 1.51272, 0.150281)
+light_energy = 2.143
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ms257")
+
+[node name="vehicle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 276.565, 200)
+
+[node name="Camera3D" type="Camera3D" parent="vehicle"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 100, 0)
+current = true

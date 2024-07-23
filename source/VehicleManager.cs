@@ -9,115 +9,87 @@ using System.Threading.Tasks;
 
 public static class VehicleManager
 {
-	public static LatLon vehicleWorldCoordinate = new LatLon(59.34732744174741, 18.069374291605303);
+	public static Vector3 vehiclePosition = new();
 
-	
-	static TrackNode currentTrackNode;
-	static TrackNode targetTrackNode;
-	static Vector3 travelDirection = new Vector3();
-	static Vector3 cameraLookTarget = new Vector3();
+    public static Route currentRoute;
 
-	static float speed = 30f;
-	static double distanceAlongTrackSegment = 0;
-	static double fractionAlongTrackSegment = 0;
-	static double currentSegmentLength;
+	static int routePointIndex = 1;
+	static Vector3 targetPosition = new();
+	static Vector3 travelDirection = new();
+	//static Vector3 cameraLookTarget = new Vector3();
 
-	static Camera3D camera;
-	static Node3D vehicleCursor;
+	static float speed = 60f;
+	//static double distanceAlongTrackSegment = 0;
+	//static double fractionAlongTrackSegment = 0;
+	//static double currentSegmentLength;
+
+	//static Camera3D camera;
+	public static Node3D vehicleNode;
 
 	public static void Startup()
 	{
-		camera = new Camera3D();
-		WorldManager.worldRoot.AddChild(camera);
-		camera.Current = true;
-		camera.Position = new Vector3(0, 3, 0);
-		camera.Fov = 60;
-		//camera.RotateX(Mathf.Pi / 2);
-		//camera.LookAt(new Vector3(0.001f, 0, 0));
-
-		vehicleCursor = new Node3D();
-		WorldManager.worldRoot.AddChild(vehicleCursor);
-
-		SnapToTrackNode();
+		vehiclePosition = GetRoutePointPosition(0);
+		targetPosition = GetRoutePointPosition(1);
 	}
 
 
 	public static void Tick(double delta)
 	{
 		Vector3 deltaTravel = travelDirection * speed * (float)delta;
-		distanceAlongTrackSegment += deltaTravel.Length();
-		fractionAlongTrackSegment += deltaTravel.Length() / currentSegmentLength;
-
-		Vector3 actualPositionDelta = TrackInterpolation.GetPositionFromKey(currentTrackNode, targetTrackNode, (float)fractionAlongTrackSegment) - vehicleCursor.GlobalPosition;
-
-		if (currentTrackNode == null) 
+		vehiclePosition += deltaTravel;
+		vehicleNode.Position = vehiclePosition;
+		vehicleNode.LookAt(targetPosition);
+		travelDirection = vehiclePosition.DirectionTo(targetPosition);
+		if ((vehiclePosition - targetPosition).Length() < speed * delta*2)
 		{
-			SnapToTrackNode();
+			routePointIndex++;
+			targetPosition = GetRoutePointPosition(routePointIndex);
+			// crashes on track runout probably?
 		}
-		else if (vehicleCursor.Position.DistanceTo(targetTrackNode.physicalNode.Position) < 2* speed * delta)
-		{
-			TrackNodeStepover();
-		}
-		vehicleWorldCoordinate = vehicleWorldCoordinate.Moved_M(deltaTravel.X, deltaTravel.Z);
-		WorldRenderer.MoveWorld(actualPositionDelta);
-
-		travelDirection = TrackInterpolation.GetForwardVectorFromKey(currentTrackNode, targetTrackNode, (float)fractionAlongTrackSegment);// + (targetTrackNode.physicalNode.Position - vehicleCursor.Position).Normalized();
-		double angleDiff = travelDirection.AngleTo(camera.Position.DirectionTo(cameraLookTarget));
-
-        if (angleDiff < Math.PI / 20)
-		{
-			cameraLookTarget += (camera.Position + travelDirection * 100) * 0.01f;
-			cameraLookTarget /= 1.01f;
-		}
-		else if (angleDiff > Math.PI / 4)
-		{
-			cameraLookTarget = camera.Position + travelDirection * 100;
-        }
-
-		// Debug
-		//cameraLookTarget = camera.Position + Vector3.Down * 1000 + Vector3.Forward;
-
-		camera.LookAt(cameraLookTarget);
 	}
 
+	private static Vector3 GetRoutePointPosition(int idx) {
+		TrackPoint point = WorldManager.track.points[currentRoute.points[routePointIndex]];
+		return new Vector3((float)point.xoffset, 0, (float)point.yoffset);
+    }
 
-	static void TrackNodeStepover()
-	{
-		currentTrackNode = targetTrackNode;
-		double deviationRecord = 3;
-		TrackNode recordHolder = null;
-		foreach (var entry in targetTrackNode.NeighbourDistances)
-		{
-			double deviation = travelDirection.AngleTo(entry.Key.physicalNode.Position - targetTrackNode.physicalNode.Position);
-			if (entry.Key != currentTrackNode && deviation < deviationRecord)
-			{
-				recordHolder = entry.Key;
-				deviationRecord = deviation;
-			}
-		}
-		targetTrackNode = recordHolder;
-		distanceAlongTrackSegment = 0;
-		fractionAlongTrackSegment = 0;
-		currentSegmentLength = TrackInterpolation.GetLengthOfSegment(currentTrackNode, targetTrackNode);
-	}
+	//static void TrackNodeStepover()
+	//{
+	//	currentTrackNode = targetTrackNode;
+	//	double deviationRecord = 3;
+	//	TrackPoint recordHolder = null;
+	//	foreach (var entry in targetTrackNode.NeighbourDistances)
+	//	{
+	//		double deviation = travelDirection.AngleTo(entry.Key.physicalNode.Position - targetTrackNode.physicalNode.Position);
+	//		if (entry.Key != currentTrackNode && deviation < deviationRecord)
+	//		{
+	//			recordHolder = entry.Key;
+	//			deviationRecord = deviation;
+	//		}
+	//	}
+	//	targetTrackNode = recordHolder;
+	//	distanceAlongTrackSegment = 0;
+	//	fractionAlongTrackSegment = 0;
+	//	currentSegmentLength = TrackInterpolation.GetLengthOfSegment(currentTrackNode, targetTrackNode);
+	//}
 
-	static void SnapToTrackNode()
-	{
-		double distanceRecord = double.MaxValue;
-		TrackNode recordHolder = RouteManager.trackNodesInRoute.Values.ToArray()[0];
-		foreach (TrackNode trackNode in RouteManager.trackNodesInRoute.Values)
-		{
-			double d = trackNode.physicalNode.Position.Length();
-			if (d < distanceRecord)
-			{
-				distanceRecord = d;
-				recordHolder = trackNode;
-			}
-		}
-		WorldRenderer.MoveWorld(recordHolder.physicalNode.Position);
-		targetTrackNode = recordHolder;
-		currentTrackNode = recordHolder;
-		TrackNodeStepover();
-	}
+	//static void SnapToTrackNode()
+	//{
+	//	double distanceRecord = double.MaxValue;
+	//	TrackPoint recordHolder = RouteManager.trackNodesInRoute.Values.ToArray()[0];
+	//	foreach (TrackPoint trackNode in RouteManager.trackNodesInRoute.Values)
+	//	{
+	//		double d = trackNode.physicalNode.Position.Length();
+	//		if (d < distanceRecord)
+	//		{
+	//			distanceRecord = d;
+	//			recordHolder = trackNode;
+	//		}
+	//	}
+	//	WorldRenderer.MoveWorld(recordHolder.physicalNode.Position);
+	//	targetTrackNode = recordHolder;
+	//	currentTrackNode = recordHolder;
+	//	TrackNodeStepover();
+	//}
 }
 

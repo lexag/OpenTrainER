@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://source/WorldRoot.cs" id="1_ix466"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8tuwg"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jibp1"]
 albedo_color = Color(0.305882, 0.305882, 0.305882, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_gk0qn"]
-material = SubResource("StandardMaterial3D_8tuwg")
+material = SubResource("StandardMaterial3D_jibp1")
 size = Vector2(100, 100)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hswah"]
@@ -19,12 +19,12 @@ ground_bottom_color = Color(0.160784, 0.137255, 0.105882, 1)
 ground_horizon_color = Color(0.564706, 0.690196, 0.623529, 1)
 sun_angle_max = 44.3
 
-[sub_resource type="Sky" id="Sky_x1hch"]
+[sub_resource type="Sky" id="Sky_t4qo8"]
 sky_material = SubResource("ProceduralSkyMaterial_4flxl")
 
 [sub_resource type="Environment" id="Environment_8xete"]
 background_mode = 2
-sky = SubResource("Sky_x1hch")
+sky = SubResource("Sky_t4qo8")
 sky_custom_fov = 59.2
 ssr_enabled = true
 

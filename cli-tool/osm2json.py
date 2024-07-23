@@ -44,7 +44,7 @@ with open(args.filename, 'r') as f:
 			
 			# place point in space
 			point_object = {}
-			point_object["xoffset"] = (lon - args.origin_lon)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000 / math.cos(lat * (math.pi / 180)))
+			point_object["xoffset"] = -(lon - args.origin_lon)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000 / math.cos(lat * (math.pi / 180)))
 			point_object["yoffset"] = (lat - args.origin_lat)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000)
 			region_data["points"][node] = (point_object)
 			point_object["linked_nodes"] = {}

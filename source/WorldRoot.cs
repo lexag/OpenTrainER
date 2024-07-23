@@ -46,7 +46,6 @@ public partial class WorldRoot : Node
                 }
                 InstanceTrackSegment(point, trackPoints[neighbour.Key]);
 
-                instancedSegments.Add(neighbour.Key + '-' + pointId);
                 instancedSegments.Add(pointId + '-' + neighbour.Key);
             }
         }
@@ -83,8 +82,8 @@ public partial class WorldRoot : Node
         aTangent *= abDisplacement.Length() / 2;
         bTangent *= abDisplacement.Length() / 2;
 
-        //Vector2[] polygonPoints = { new(-gauge, thickness), new(gauge, thickness), new(gauge, 0), new(-gauge, 0) };
-        //polygonPoints = Geometry2D.ConvexHull(polygonPoints);
+        Vector2[] polygonPoints = { new(-gauge, thickness), new(gauge, thickness), new(gauge, 0), new(-gauge, 0) };
+        polygonPoints = Geometry2D.ConvexHull(polygonPoints);
 
         Path3D path = new Path3D();
         AddChild(path);
@@ -99,7 +98,7 @@ public partial class WorldRoot : Node
         csgPolygon3D.Mode = CsgPolygon3D.ModeEnum.Path;
         csgPolygon3D.PathNode = path.GetPath();
         csgPolygon3D.PathLocal = true;
-        //csgPolygon3D.Polygon = polygonPoints;
+        csgPolygon3D.Polygon = polygonPoints;
 
         GD.Print($"a: ({a.xoffset}; {a.yoffset}), b: ({b.xoffset}; {b.yoffset}), aTangent: {aTangent}, bTangent: {bTangent}, abDisplacement: {abDisplacement}, pathPos: {path.Position} == {path.GlobalPosition}");
         return path;
