@@ -2,7 +2,7 @@ using Godot;
 using Godot.NativeInterop;
 using System.Collections.Generic;
 
-public partial class WorldRoot : Node
+public partial class Renderer : Node
 {
 	[Export]
 	public bool idle = false;
@@ -15,7 +15,7 @@ public partial class WorldRoot : Node
 	public override void _Ready()
 	{
 		base._Ready();
-		WorldManager.worldRoot = this;
+		WorldManager.renderer = this;
 		if (!idle)
 		{
 			WorldManager.Setup();
@@ -79,8 +79,8 @@ public partial class WorldRoot : Node
 		aTangent *= Mathf.Sign(aTangent.Dot(abDisplacement));
 		bTangent *= Mathf.Sign(bTangent.Dot(-abDisplacement));
 
-		aTangent *= abDisplacement.Length() / 2;
-		bTangent *= abDisplacement.Length() / 2;
+		aTangent *= abDisplacement.Length() / 3f;
+		bTangent *= abDisplacement.Length() / 3f;
 
 		Vector2[] polygonPoints = { new(-gauge, thickness), new(gauge, thickness), new(gauge, 0), new(-gauge, 0) };
 		polygonPoints = Geometry2D.ConvexHull(polygonPoints);
@@ -90,8 +90,8 @@ public partial class WorldRoot : Node
 		path.Position = new Vector3((float)a.xoffset, 0, (float)a.yoffset);
 
 		path.Curve = new Curve3D();
-		path.Curve.AddPoint(Vector3.Zero, -aTangent, aTangent);
-		path.Curve.AddPoint(abDisplacement, bTangent, -bTangent);
+		path.Curve.AddPoint(Vector3.Zero, Vector3.Zero, aTangent);
+		path.Curve.AddPoint(abDisplacement, bTangent, Vector3.Zero);
 
 		CsgPolygon3D csgPolygon3D = new();
 		path.AddChild(csgPolygon3D);

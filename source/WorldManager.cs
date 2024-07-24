@@ -46,7 +46,7 @@ public struct Route
 
 public static class WorldManager
 {
-	public static WorldRoot worldRoot = null;
+	public static Renderer renderer = null;
 
 	public static TrackFileStruct track;
 
@@ -57,7 +57,7 @@ public static class WorldManager
 		//WorldRenderer.RenderListOfTrackNodes(RouteManager.trackNodesInRoute.Values.ToList());
 		//WorldRenderer.RenderListOfStations(RouteManager.stationsInRoute);
 
-		Vehicle.vehicleNode = (Node3D)worldRoot.FindChild("vehicle");
+		Vehicle.vehicleNode = (Node3D)renderer.FindChild("vehicle");
 		Vehicle.Init("test_vehicle");
 
 		//worldRoot.SetProcess(true);
@@ -72,7 +72,7 @@ public static class WorldManager
 	public static void LoadLineAndRoute(string lineName, string routeName)
 	{
 		track = JSONLoader.LoadFile<TrackFileStruct>("lines/"+lineName, "track.json");
-		worldRoot.RenderTrack(track.points);
+		renderer.RenderTrack(track.points);
 
 		RoutesFileStruct routes = JSONLoader.LoadFile<RoutesFileStruct>("lines/"+lineName, "routes.json");
 		Vehicle.currentRoute = routes.routes[routeName];

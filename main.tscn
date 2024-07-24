@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://1umlw7ie4via"]
 
-[ext_resource type="Script" path="res://source/WorldRoot.cs" id="1_o4af6"]
+[ext_resource type="Script" path="res://source/Renderer.cs" id="1_8etd7"]
 [ext_resource type="Texture2D" uid="uid://mlgnf0gihi5n" path="res://icon.svg" id="2_miq24"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0fc8r"]
@@ -21,7 +21,7 @@ sky_custom_fov = 59.2
 ssr_enabled = true
 
 [node name="Node3D" type="Node3D"]
-script = ExtResource("1_o4af6")
+script = ExtResource("1_8etd7")
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 416)
@@ -42,5 +42,5 @@ environment = SubResource("Environment_ms257")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 276.565, 200)
 
 [node name="Camera3D" type="Camera3D" parent="vehicle"]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 15, 0)
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 3, 0)
 current = true

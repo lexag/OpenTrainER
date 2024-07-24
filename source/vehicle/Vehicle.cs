@@ -31,7 +31,7 @@ public static class Vehicle
 	static Vector3 vehiclePosition = new();
 	static Vector3 targetPosition = new();
 	static Vector3 travelDirection = new();
-	static float speed = 60f;
+	static float speed = 10f;
 
 	static Dictionary<string, double> properties = new();
 	static List<VehicleComponent> components = new();
