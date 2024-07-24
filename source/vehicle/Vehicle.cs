@@ -31,6 +31,7 @@ public static class Vehicle
 	static Vector3 vehiclePosition = new();
 	static Vector3 targetPosition = new();
 	static Vector3 travelDirection = new();
+	static Vector3 forwardDirection = new();
 	static float speed = 10f;
 
 	static Dictionary<string, double> properties = new();
@@ -57,26 +58,29 @@ public static class Vehicle
 
 		vehiclePosition = GetRoutePointPosition(0);
 		targetPosition = GetRoutePointPosition(1);
+		travelDirection = vehiclePosition.DirectionTo(targetPosition);
 	}
 
 
 	public static void Tick(double delta)
 	{
-		Vector3 deltaTravel = travelDirection * speed * (float)delta;
+		Vector3 deltaTravel = forwardDirection.Normalized() * speed * (float)delta;
 		vehiclePosition += deltaTravel;
-		vehicleNode.Position = vehiclePosition;
-		vehicleNode.LookAt(targetPosition);
-		travelDirection = vehiclePosition.DirectionTo(targetPosition);
+		Transform3D vehicleTransform = WorldManager.renderer.MoveVehicle(vehiclePosition, travelDirection, currentRoute.points[routePointIndex - 1], currentRoute.points[routePointIndex]);
+		vehiclePosition = vehicleTransform.Origin;
+		forwardDirection = -vehicleTransform.Basis.Z;
+
 		if ((vehiclePosition - targetPosition).Length() < speed * delta*1.1f)
 		{
 			routePointIndex++;
 			targetPosition = GetRoutePointPosition(routePointIndex);
+			travelDirection = vehiclePosition.DirectionTo(targetPosition);
 			// crashes on track runout probably?
 		}
 	}
 
 	private static Vector3 GetRoutePointPosition(int idx) {
-		TrackPoint point = WorldManager.track.points[currentRoute.points[routePointIndex]];
+		TrackPoint point = WorldManager.track.points[currentRoute.points[idx]];
 		return new Vector3((float)point.xoffset, 0, (float)point.yoffset);
     }
 

@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 public partial class Renderer : Node
 {
-	[Export]
+	Dictionary<UnorderedPair<string>, Path3D> pointIdPathMap = new();
+
+    [Export]
 	public bool idle = false;
 
 	public override void _EnterTree()
@@ -20,7 +22,9 @@ public partial class Renderer : Node
 		{
 			WorldManager.Setup();
 		}
-	}
+
+        vehicleNode = (Node3D)FindChild("vehicle");
+    }
 
 	public override void _Process(double delta)
 	{
@@ -33,20 +37,21 @@ public partial class Renderer : Node
 
 	public void RenderTrack(Dictionary<string, TrackPoint> trackPoints)
 	{
-		List<string> instancedSegments = new List<string>();
+		List<UnorderedPair<string>> instancedSegments = new();
 		foreach (var trackPoint in trackPoints)
 		{
 			string pointId = trackPoint.Key;
 			TrackPoint point = trackPoint.Value;
 			foreach (var neighbour in point.linked_nodes)
 			{
-				if (instancedSegments.Contains(neighbour.Key + '-' + pointId) || instancedSegments.Contains(pointId + '-' + neighbour.Key))
+				if (instancedSegments.Contains(new UnorderedPair<string>(pointId, neighbour.Key)))
 				{
 					continue;
 				}
-				InstanceTrackSegment(point, trackPoints[neighbour.Key]);
+				Path3D path = InstanceTrackSegment(point, trackPoints[neighbour.Key]);
+				pointIdPathMap[new UnorderedPair<string>(pointId, neighbour.Key)] = path;
 
-				instancedSegments.Add(pointId + '-' + neighbour.Key);
+				instancedSegments.Add(new UnorderedPair<string>(pointId, neighbour.Key));
 			}
 		}
 	}
@@ -103,5 +108,24 @@ public partial class Renderer : Node
 		//GD.Print($"a: ({a.xoffset}; {a.yoffset}), b: ({b.xoffset}; {b.yoffset}), aTangent: {aTangent}, bTangent: {bTangent}, abDisplacement: {abDisplacement}, pathPos: {path.Position} == {path.GlobalPosition}");
 		return path;
 	}
+
+    
+	
+	Node3D vehicleNode;
+	
+	public Transform3D MoveVehicle(Vector3 position, Vector3 forwardVector, string pointA, string pointB)
+	{
+		Path3D path = pointIdPathMap[new UnorderedPair<string>(pointA, pointB)];
+		float closestOffset = path.Curve.GetClosestOffset(position-path.Position);
+		Transform3D transform = path.Curve.SampleBakedWithRotation(closestOffset);
+		if (transform.Basis.Z.Dot(forwardVector) > 0)
+		{
+			transform = transform.RotatedLocal(transform.Basis.Y, Mathf.Pi);
+		}
+		transform.Origin += path.Position;
+		vehicleNode.Transform = transform;
+		return transform;
+	}
+
 }
 

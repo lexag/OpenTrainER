@@ -57,7 +57,6 @@ public static class WorldManager
 		//WorldRenderer.RenderListOfTrackNodes(RouteManager.trackNodesInRoute.Values.ToList());
 		//WorldRenderer.RenderListOfStations(RouteManager.stationsInRoute);
 
-		Vehicle.vehicleNode = (Node3D)renderer.FindChild("vehicle");
 		Vehicle.Init("test_vehicle");
 
 		//worldRoot.SetProcess(true);
