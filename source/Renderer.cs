@@ -1,10 +1,12 @@
 using Godot;
 using Godot.NativeInterop;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 
 public partial class Renderer : Node
 {
 	Dictionary<UnorderedPair<string>, Path3D> pointIdPathMap = new();
+	List<Node3D> trackHeightMarkers = new();
 
     [Export]
 	public bool idle = false;
@@ -35,7 +37,7 @@ public partial class Renderer : Node
 		}
 	}
 
-	public void RenderTrack(Dictionary<string, TrackPoint> trackPoints)
+	public void RenderTrack(Dictionary<string, TrackPoint> trackPoints, bool enableHeight = true)
 	{
 		List<UnorderedPair<string>> instancedSegments = new();
 		foreach (var trackPoint in trackPoints)
@@ -48,7 +50,7 @@ public partial class Renderer : Node
 				{
 					continue;
 				}
-				Path3D path = InstanceTrackSegment(point, trackPoints[neighbour.Key]);
+				Path3D path = InstanceTrackSegment(point, trackPoints[neighbour.Key], enableHeight: enableHeight);
 				pointIdPathMap[new UnorderedPair<string>(pointId, neighbour.Key)] = path;
 
 				instancedSegments.Add(new UnorderedPair<string>(pointId, neighbour.Key));
@@ -56,7 +58,18 @@ public partial class Renderer : Node
 		}
 	}
 
-	Node3D InstancePoint(TrackPoint point, bool b_sprite = false)
+    public void RenderScene(Node3D scene, float[] offset)
+    {
+        AddChild(scene);
+		scene.Rotation = new Vector3(0, Mathf.Pi, 0);
+		scene.Position += new Vector3(offset[0], offset[1], offset[2]);
+		foreach (var trackHeightMarker in scene.FindChildren("track-height*"))
+		{
+			trackHeightMarkers.Add((Node3D)trackHeightMarker);
+		}
+    }
+
+    Node3D InstancePoint(TrackPoint point, bool b_sprite = false)
 	{
 		Node3D node = new Node3D();
 		AddChild(node);
@@ -75,11 +88,38 @@ public partial class Renderer : Node
 		return node;
 	}
 
-	Path3D InstanceTrackSegment(TrackPoint a, TrackPoint b, float gauge = 1.435f, float thickness = 0.2f)
+
+	private float EvaluateWeightedAveragePointHeight(Vector3 pos)
 	{
-		Vector3 aTangent = new Vector3(a.tangent[0], 0, a.tangent[1]);
+        float heightSum = 0;
+        float weightSum = 0;
+        foreach (Node3D node in trackHeightMarkers)
+        {
+			float weight = 1 / node.GlobalPosition.DistanceTo(pos);
+			weightSum += weight;
+			heightSum += node.GlobalPosition.Y * weight;
+        }
+		if (weightSum == 0) {
+			return 0;
+		}
+		return heightSum / weightSum;
+    }
+
+
+	Path3D InstanceTrackSegment(TrackPoint a, TrackPoint b, bool enableHeight = true, float gauge = 1.435f, float thickness = 0.2f)
+	{
+		Vector3 aPos = new Vector3((float)a.xoffset, 0, (float)a.yoffset);
+		Vector3 bPos = new Vector3((float)b.xoffset, 0, (float)b.yoffset);
+
+		if(enableHeight)
+		{
+            aPos.Y = EvaluateWeightedAveragePointHeight(aPos);
+            bPos.Y = EvaluateWeightedAveragePointHeight(bPos);
+        }
+
+        Vector3 aTangent = new Vector3(a.tangent[0], 0, a.tangent[1]);
 		Vector3 bTangent = new Vector3(b.tangent[0], 0, b.tangent[1]);
-		Vector3 abDisplacement = new Vector3((float)(b.xoffset - a.xoffset), 0, (float)(b.yoffset - a.yoffset));
+		Vector3 abDisplacement = bPos - aPos;
 
 		aTangent *= Mathf.Sign(aTangent.Dot(abDisplacement));
 		bTangent *= Mathf.Sign(bTangent.Dot(-abDisplacement));
@@ -92,7 +132,7 @@ public partial class Renderer : Node
 
 		Path3D path = new Path3D();
 		AddChild(path);
-		path.Position = new Vector3((float)a.xoffset, 0, (float)a.yoffset);
+		path.Position = aPos;
 
 		path.Curve = new Curve3D();
 		path.Curve.AddPoint(Vector3.Zero, Vector3.Zero, aTangent);
@@ -112,11 +152,11 @@ public partial class Renderer : Node
     
 	
 	Node3D vehicleNode;
-	
+
 	public Transform3D MoveVehicle(Vector3 position, Vector3 forwardVector, string pointA, string pointB)
 	{
 		Path3D path = pointIdPathMap[new UnorderedPair<string>(pointA, pointB)];
-		float closestOffset = path.Curve.GetClosestOffset(position-path.Position);
+		float closestOffset = path.Curve.GetClosestOffset(position - path.Position);
 		Transform3D transform = path.Curve.SampleBakedWithRotation(closestOffset);
 		if (transform.Basis.Z.Dot(forwardVector) > 0)
 		{
@@ -126,6 +166,5 @@ public partial class Renderer : Node
 		vehicleNode.Transform = transform;
 		return transform;
 	}
-
 }
 

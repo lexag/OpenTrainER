@@ -22,6 +22,7 @@ public struct RoutesFileStruct
 }
 
 
+
 public struct TrackPoint
 {
 	public double xoffset;
@@ -70,11 +71,18 @@ public static class WorldManager
 
 	public static void LoadLineAndRoute(string lineName, string routeName)
 	{
-		track = JSONLoader.LoadFile<TrackFileStruct>("lines/"+lineName, "track.json");
-		renderer.RenderTrack(track.points);
-
 		RoutesFileStruct routes = JSONLoader.LoadFile<RoutesFileStruct>("lines/"+lineName, "routes.json");
 		Vehicle.currentRoute = routes.routes[routeName];
+
+		Dictionary<string, float[]> sceneData = JSONLoader.LoadFile<Dictionary<string, float[]>>("lines/" + lineName, "scene.json");
+		foreach (var sceneInfo in sceneData)
+		{
+			Node3D scene = GLTFLoader.LoadFromPath("lines/" + lineName, "scene/" + sceneInfo.Key, userFile: true);
+			renderer.RenderScene(scene, sceneInfo.Value);
+		}
+
+		track = JSONLoader.LoadFile<TrackFileStruct>("lines/"+lineName, "track.json");
+		renderer.RenderTrack(track.points);
 	}
 
 }
