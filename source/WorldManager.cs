@@ -57,37 +57,26 @@ public static class WorldManager
 		//WorldRenderer.RenderListOfTrackNodes(RouteManager.trackNodesInRoute.Values.ToList());
 		//WorldRenderer.RenderListOfStations(RouteManager.stationsInRoute);
 
-		VehicleManager.vehicleNode = (Node3D)worldRoot.FindChild("vehicle");
-		VehicleManager.Startup();
+		Vehicle.vehicleNode = (Node3D)worldRoot.FindChild("vehicle");
+		Vehicle.Init("test_vehicle");
 
 		//worldRoot.SetProcess(true);
 	}
 
 	public static void Tick(double delta)
 	{
-		VehicleManager.Tick(delta);
+		Vehicle.Tick(delta);
 		//WorldRenderer.RenderTick();
 	}
 
 	public static void LoadLineAndRoute(string lineName, string routeName)
 	{
-		var path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-		var lineFolderPath = Path.Combine(path, "OpenTrainER", "lines", lineName);
-		
-		using (StreamReader r = new StreamReader(Path.Combine(lineFolderPath, "track.json")))
-		{
-			string json = r.ReadToEnd();
-			track = JsonConvert.DeserializeObject<TrackFileStruct>(json);
-			worldRoot.RenderTrack(track.points);
-		}
+		track = JSONLoader.LoadFile<TrackFileStruct>("lines/"+lineName, "track.json");
+		worldRoot.RenderTrack(track.points);
 
-        using (StreamReader r = new StreamReader(Path.Combine(lineFolderPath, "routes.json")))
-        {
-            string json = r.ReadToEnd();
-            RoutesFileStruct routes = JsonConvert.DeserializeObject<RoutesFileStruct>(json);
-			VehicleManager.currentRoute = routes.routes[routeName];
-        }
-    }
+		RoutesFileStruct routes = JSONLoader.LoadFile<RoutesFileStruct>("lines/"+lineName, "routes.json");
+		Vehicle.currentRoute = routes.routes[routeName];
+	}
 
 }
 
