@@ -92,6 +92,10 @@ public static class Vehicle
 		return properties[name];
 	}
 
+	/// <summary>
+	/// Used by VehicleComponents
+	/// Tries to set property and returns whether property exists.
+	/// </summary>
 	public static bool SetProperty(string name, double value)
 	{
 		if (!properties.ContainsKey(name))
@@ -101,5 +105,36 @@ public static class Vehicle
 		properties[name] = value;
 		return true;
 	}
+
+
+    /// <summary>
+    /// Used by VehicleComponents
+    /// Tries to change property and returns whether property exists.
+    /// </summary>
+    public static bool ChangeProperty(string name, double value)
+    {
+        if (!properties.ContainsKey(name))
+        {
+            return false;
+        }
+        properties[name] += value;
+        return true;
+    }
+
+
+    /// <summary>
+    /// Used by VehicleComponents
+    /// Tries to init property (with optional value) and returns whether property was inited properly.
+    /// </summary>
+	public static bool InitProperty(string name, double value = 0.0) 
+	{
+        if (properties.ContainsKey(name))
+        {
+            return false;
+        }
+        properties[name] = value;
+        return true;
+    }
+
 }
 
