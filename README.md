@@ -16,7 +16,7 @@ to discuss what you would like to change.
 OpenTrainER runs on Godot 4.2.1 (Although any 4.2.x should work fine) [Download Godot](https://godotengine.org/download/archive/#4.2.1)
 
 ## Roadmap
-- [ ] Railway data from OpenStreetMap
+- [x] Railway data from OpenStreetMap
 - [ ] Physically accurate wheel-rail interaction
 - [ ] Modular vehicle component system
 - [ ] Signalling
