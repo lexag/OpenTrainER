@@ -89,7 +89,8 @@ public static class Vehicle
 
 	public static double GetProperty(string name)
 	{
-		return properties[name];
+		if (properties.ContainsKey(name)) return properties[name];
+		return 0;
 	}
 
 	/// <summary>
