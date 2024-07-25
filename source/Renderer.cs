@@ -163,7 +163,9 @@ public partial class Renderer : Node
 			transform = transform.RotatedLocal(transform.Basis.Y, Mathf.Pi);
 		}
 		transform.Origin += path.Position;
-		vehicleNode.Transform = transform;
+		Vector3 deltaMove = transform.Origin - position;
+		vehicleNode.GlobalTransform = transform;
+		GD.Print($"delta: {deltaMove}, A: {pointA}, B: {pointB}, closestOffset: {closestOffset}   {WorldManager.track.points[pointB].xoffset}, {WorldManager.track.points[pointB].yoffset}   {transform.Origin}");
 		return transform;
 	}
 }

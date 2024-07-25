@@ -70,7 +70,9 @@ public static class Vehicle
 		vehiclePosition = vehicleTransform.Origin;
 		forwardDirection = -vehicleTransform.Basis.Z;
 
-		if ((vehiclePosition - targetPosition).Length() < speed * delta*1.1f)
+		Vector3 flat = new Vector3(1, 0, 1);
+		//GD.Print($"{(vehiclePosition * flat).DistanceTo(targetPosition * flat)}   {speed * delta * 2}   {currentRoute.points[routePointIndex]}   {targetPosition}  {vehiclePosition}");
+		if ((vehiclePosition * flat).DistanceTo(targetPosition * flat) < speed * delta*2f)
 		{
 			routePointIndex++;
 			targetPosition = GetRoutePointPosition(routePointIndex);

@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://bdxmg8idyjt2r"]
 
-[ext_resource type="Script" path="res://source/WorldRoot.cs" id="1_ix466"]
+[ext_resource type="Script" path="res://source/Renderer.cs" id="1_ix466"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jibp1"]
 albedo_color = Color(0.305882, 0.305882, 0.305882, 1)
