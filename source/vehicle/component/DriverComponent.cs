@@ -4,10 +4,17 @@ namespace OpenTrainER.source.vehicle.component
 {
     internal class DriverComponent : VehicleComponent
     {
-        double cross_sectional_area;
-        double drag_coefficient;
-        double rolling_resistance_coefficient;
-        double mass;
+        double cross_sectional_area = 0;
+        double drag_coefficient = 0;
+        double rolling_resistance_coefficient = 0;
+        double mass = 10000;
+
+        protected override void OnInit()
+        {
+            Vehicle.InitProperty("speed");
+            Vehicle.InitProperty("gradient");
+        }
+
 
         protected override void OnTick(double delta)
         {

@@ -18,10 +18,6 @@ struct VehicleFileStruct
 
 public static class Vehicle
 {
-	static readonly Dictionary<string, Type> stringComponentMap = new Dictionary<string, Type>() 
-	{
-        { "KeyboardInputComponent", typeof(KeyboardInputComponent)},
-	};
 
     public static Route currentRoute;
 	static int routePointIndex = 1;
@@ -32,7 +28,6 @@ public static class Vehicle
 	static Vector3 targetPosition = new();
 	static Vector3 travelDirection = new();
 	static Vector3 forwardDirection = new();
-	static float speed = 10f;
 
 	static Dictionary<string, double> properties = new();
 	static List<VehicleComponent> components = new();
@@ -45,15 +40,24 @@ public static class Vehicle
 		// Load all components
 		foreach (var component in vehicleFileStruct.components)
 		{
-			VehicleComponent newComponent = component.Key switch
+			VehicleComponent newComponent = null;
+			try
 			{
-				"KeyboardInputComponent" => JSONLoader.Reparse<KeyboardInputComponent>(component.Value),
-				_ => null
-			};
+				newComponent = (VehicleComponent)Activator.CreateInstance(Type.GetType("OpenTrainER.source.vehicle.component." + component.Key));
+				JSONLoader.Repopulate(newComponent, component.Value);
+			}
+			catch (ArgumentNullException argumentNullException)
+			{
+				GD.Print($"component {component.Key} is invalid");
+			}
+
 			if (newComponent != null)
 			{
 				components.Add(newComponent);
+				newComponent.Init();
+				GD.Print($"added component {component.Key}");
 			}
+
 		}
 
 		vehiclePosition = GetRoutePointPosition(0);
@@ -64,7 +68,7 @@ public static class Vehicle
 
 	public static void Tick(double delta)
 	{
-		Vector3 deltaTravel = forwardDirection.Normalized() * speed * (float)delta;
+		Vector3 deltaTravel = forwardDirection.Normalized() * (float)delta * (float)GetProperty("speed");
 		vehiclePosition += deltaTravel;
 		Transform3D vehicleTransform = WorldManager.renderer.MoveVehicle(vehiclePosition, travelDirection, currentRoute.points[routePointIndex - 1], currentRoute.points[routePointIndex]);
 		vehiclePosition = vehicleTransform.Origin;
@@ -72,12 +76,23 @@ public static class Vehicle
 
 		Vector3 flat = new Vector3(1, 0, 1);
 		//GD.Print($"{(vehiclePosition * flat).DistanceTo(targetPosition * flat)}   {speed * delta * 2}   {currentRoute.points[routePointIndex]}   {targetPosition}  {vehiclePosition}");
-		if ((vehiclePosition * flat).DistanceTo(targetPosition * flat) < speed * delta*2f)
+		if ((vehiclePosition * flat).DistanceTo(targetPosition * flat) < (float)GetProperty("speed") * delta*2f)
 		{
 			routePointIndex++;
 			targetPosition = GetRoutePointPosition(routePointIndex);
 			travelDirection = vehiclePosition.DirectionTo(targetPosition);
 			// crashes on track runout probably?
+		}
+
+		foreach (var component in components)
+		{
+			component.Tick(delta);
+		}
+
+		// Debug
+		foreach(var property in properties)
+		{
+			GD.Print($"{property.Key}: {property.Value}");
 		}
 	}
 

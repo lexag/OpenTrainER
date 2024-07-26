@@ -12,7 +12,7 @@ namespace OpenTrainER.source.vehicle.component
         {
             base.OnTick(delta);
 
-            double throttle = Vehicle.GetProperty("control:throttle");
+            double throttle = Vehicle.GetProperty("controls:throttle");
             Vehicle.ChangeProperty("speed", throttle * delta);
         }
     }
