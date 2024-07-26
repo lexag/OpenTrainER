@@ -29,4 +29,14 @@ internal class JSONLoader
     {
         return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj));
     }
+
+    public static void Populate(object obj, string str)
+    {
+        JsonConvert.PopulateObject(str, obj);
+    }
+    
+    public static void Repopulate(object target, object value)
+    {
+        JsonConvert.PopulateObject(JsonConvert.SerializeObject(value), target);
+    }
 }

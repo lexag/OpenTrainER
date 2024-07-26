@@ -8,5 +8,18 @@ namespace OpenTrainER.source.vehicle.component
 {
     internal class VehicleComponent
     {
+        public void Init()
+        {
+            OnInit();
+        }
+
+        protected virtual void OnInit() { }
+
+        public void Tick(double delta)
+        {
+            OnTick(delta);
+        }
+
+        protected virtual void OnTick(double delta) { }
     }
 }
