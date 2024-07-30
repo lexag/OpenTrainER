@@ -8,11 +8,14 @@ namespace OpenTrainER.source.vehicle.component
         double drag_coefficient = 0;
         double rolling_resistance_coefficient = 0;
         double mass = 10000;
+        double equivalent_mass = 10000;
 
         protected override void OnInit()
         {
             Vehicle.InitProperty("speed");
             Vehicle.InitProperty("gradient");
+            Vehicle.InitProperty("traction_force");
+            Vehicle.InitProperty("status:wheelslip");
         }
 
 
@@ -24,18 +27,34 @@ namespace OpenTrainER.source.vehicle.component
             double speed = Vehicle.GetProperty("speed");
             double gradient = Vehicle.GetProperty("gradient");
             
+
             // Air resistance
             double dragForce = 0.5 * airDensity * speed * speed * drag_coefficient * cross_sectional_area;
 
             // Rolling resistance
-            double rollingResistance = rolling_resistance_coefficient * mass * gravity * Math.Cos(Math.Atan(gradient));
+            double rollingResistanceForce = rolling_resistance_coefficient * mass * gravity * Math.Cos(Math.Atan(gradient)) * Math.Sign(speed);
 
             // Gradient gravity
-            double gradientGravity = mass * gravity * Math.Sin(Math.Atan(gradient));
+            double gradientGravityForce = mass * gravity * Math.Sin(Math.Atan(gradient));
 
-            double totalForce = dragForce * rollingResistance * gradientGravity;
+            // Traction
+            double tractionForce = Vehicle.GetProperty("traction_force");
+            double maxTractionForce = Environment.wheelRailFrictionCoefficient * mass * gravity;
 
-            Vehicle.ChangeProperty("speed", -totalForce / mass * delta);
+            if (tractionForce > maxTractionForce) 
+            {
+                tractionForce = 0;
+                Vehicle.SetProperty("status:wheelslip", 1);
+            }
+            else
+            {
+                Vehicle.SetProperty("status:wheelslip", 0);
+            }
+
+            double slowingSpeedChange = (-dragForce - rollingResistanceForce - gradientGravityForce) / equivalent_mass * delta;
+            double acceleratingSpeedChange = tractionForce / mass * delta;
+
+            Vehicle.ChangeProperty("speed", acceleratingSpeedChange + slowingSpeedChange);
         }
     }
 }
