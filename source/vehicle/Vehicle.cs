@@ -20,7 +20,7 @@ public static class Vehicle
 {
 
     public static Route currentRoute;
-	static int routePointIndex = 1;
+	public static int routePointIndex = 1;
 
 	public static Node3D vehicleNode;
 
@@ -34,7 +34,7 @@ public static class Vehicle
 
 	public static void Init(string vehicleFilePath)
 	{
-		VehicleFileStruct vehicleFileStruct = JSONLoader.LoadFile<VehicleFileStruct>("vehicles", vehicleFilePath + ".json");
+		VehicleFileStruct vehicleFileStruct = JSONLoader.LoadFile<VehicleFileStruct>("vehicles/" + vehicleFilePath, "vehicle.json");
 		GD.Print(JSONLoader.Reparse<KeyboardInputComponent>(vehicleFileStruct.components["KeyboardInputComponent"]).mappings);
 
 		// Load all components
@@ -90,10 +90,10 @@ public static class Vehicle
 		}
 
 		// Debug
-		foreach(var property in properties)
-		{
-			GD.Print($"{property.Key}: {property.Value}");
-		}
+		//foreach(var property in properties)
+		//{
+		//	GD.Print($"{property.Key}: {property.Value}");
+		//}
 	}
 
 	private static Vector3 GetRoutePointPosition(int idx) {

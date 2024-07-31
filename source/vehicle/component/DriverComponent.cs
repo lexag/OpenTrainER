@@ -1,5 +1,6 @@
 ﻿using System;
 
+
 namespace OpenTrainER.source.vehicle.component
 {
     internal class DriverComponent : VehicleComponent
