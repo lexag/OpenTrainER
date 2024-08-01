@@ -90,10 +90,10 @@ public static class Vehicle
 		}
 
 		// Debug
-		//foreach(var property in properties)
-		//{
-		//	GD.Print($"{property.Key}: {property.Value}");
-		//}
+		foreach (var property in properties)
+		{
+			GD.Print($"{property.Key}: {property.Value}");
+		}
 	}
 
 	private static Vector3 GetRoutePointPosition(int idx) {
