@@ -5,38 +5,48 @@
 //using System.Threading.Tasks;
 
 
-//namespace OpenTrainER.source.vehicle.component
-//{
-//    internal class ElectricDriverComponent : DriverComponent
-//    {
-//        Dictionary<int, double> power_curve;
+using System;
+using System.Data;
 
-//        protected override void OnInit()
-//        {
-//            base.OnInit();
-//        }
+namespace OpenTrainER.source.vehicle.component
+{
+    internal class ElectricDriverComponent : DriverComponent
+    {
+        public double power;
+        public double starting_force;
 
-//        protected override void OnTick(double delta)
-//        {
-//            base.OnTick(delta);
+        protected override void OnInit()
+        {
+            base.OnInit();
+            Vehicle.InitProperty("motor_current");
+        }
 
-//            int over;
-//            double overValue;
-//            int under;
-//            double underValue;
+        protected override void OnTick(double delta)
+        {
+            base.OnTick(delta);
 
-//            foreach (var powerPoint in power_curve)
-//            {
-//                if (powerPoint.Key >= Vehicle.GetProperty("speed"))
-//                {
-//                    over = powerPoint.Key;
-//                    underValue = powerPoint.Value;
-//                    break:
-//   }
-//                fpUnder = fp;
-//            }
+            double speed = Math.Abs(Vehicle.GetProperty("speed"));
+            double throttle = Math.Max(Vehicle.GetProperty("controls:throttle"), 0);
+            double force;
+            if (speed < 1)
+            {
+                force = starting_force * throttle;
+            }
+            else
+            {
+                force = power * throttle / speed;
+            }
 
-//            Vehicle.SetProperty("traction_force", power_curve);
-//        }
-//    }
-//}
+            Vehicle.SetProperty("traction_force", force);
+
+            if (Vehicle.GetProperty("status:wheelslip") > 0.5)
+            {
+                Vehicle.SetProperty("motor_current", 0);
+            }
+            else
+            {
+                Vehicle.SetProperty("motor_current", speed * force / Vehicle.GetProperty("line_voltage"));
+            }
+        }
+    }
+}

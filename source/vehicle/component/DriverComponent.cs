@@ -5,11 +5,11 @@ namespace OpenTrainER.source.vehicle.component
 {
     internal class DriverComponent : VehicleComponent
     {
-        double cross_sectional_area = 0;
-        double drag_coefficient = 0;
-        double rolling_resistance_coefficient = 0;
-        double mass = 10000;
-        double equivalent_mass = 10000;
+        public double cross_sectional_area;
+        public double drag_coefficient;
+        public double rolling_resistance_coefficient;
+        public double mass;
+        public double equivalent_mass;
 
         protected override void OnInit()
         {
