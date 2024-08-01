@@ -27,17 +27,10 @@ namespace OpenTrainER.source.vehicle.component
 
             double speed = Math.Abs(Vehicle.GetProperty("speed"));
             double throttle = Math.Max(Vehicle.GetProperty("controls:throttle"), 0);
-            double force;
-            if (speed < 1)
-            {
-                force = starting_force * throttle;
-            }
-            else
-            {
-                force = power * throttle / speed;
-            }
+            double force = Math.Min(starting_force, power/Math.Max(speed, 0.0000001));
+            force *= throttle;
 
-            Vehicle.SetProperty("traction_force", force);
+            Vehicle.ChangeProperty("traction_force", force);
 
             if (Vehicle.GetProperty("status:wheelslip") > 0.5)
             {
