@@ -42,7 +42,7 @@ namespace OpenTrainER.source.vehicle.component
 				return;
 			}
 
-			Vector2I size = backgroundImage.GetSize();
+			Vector2I size = backgroundImage.GetSize() / 2;
 			guiWindow = new Window
 			{
 				ContentScaleAspect = Window.ContentScaleAspectEnum.Keep,

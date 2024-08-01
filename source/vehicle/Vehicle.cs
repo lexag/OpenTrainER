@@ -35,7 +35,6 @@ public static class Vehicle
 	public static void Init(string vehicleFilePath)
 	{
 		VehicleFileStruct vehicleFileStruct = JSONLoader.LoadFile<VehicleFileStruct>("vehicles/" + vehicleFilePath, "vehicle.json");
-		GD.Print(JSONLoader.Reparse<KeyboardInputComponent>(vehicleFileStruct.components["KeyboardInputComponent"]).mappings);
 
 		// Load all components
 		foreach (var component in vehicleFileStruct.components)

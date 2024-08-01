@@ -16,6 +16,7 @@ namespace OpenTrainER.source.vehicle.component
             Vehicle.InitProperty("speed");
             Vehicle.InitProperty("gradient");
             Vehicle.InitProperty("traction_force");
+            Vehicle.InitProperty("braking_force");
             Vehicle.InitProperty("status:wheelslip");
         }
 
@@ -27,7 +28,7 @@ namespace OpenTrainER.source.vehicle.component
 
             double speed = Vehicle.GetProperty("speed");
             double gradient = Vehicle.GetProperty("gradient");
-            
+
 
             // Air resistance
             double dragForce = 0.5 * airDensity * speed * speed * drag_coefficient * cross_sectional_area;
@@ -40,11 +41,17 @@ namespace OpenTrainER.source.vehicle.component
 
             // Traction
             double tractionForce = Vehicle.GetProperty("traction_force");
+            double brakingForce = Vehicle.GetProperty("braking_force");
             double maxTractionForce = Environment.wheelRailFrictionCoefficient * mass * gravity;
 
-            if (tractionForce > maxTractionForce) 
+            if (tractionForce > maxTractionForce)
             {
                 tractionForce = 0;
+                Vehicle.SetProperty("status:wheelslip", 1);
+            }
+            else if (brakingForce > maxTractionForce)
+            {
+                brakingForce = 0;
                 Vehicle.SetProperty("status:wheelslip", 1);
             }
             else
@@ -52,10 +59,12 @@ namespace OpenTrainER.source.vehicle.component
                 Vehicle.SetProperty("status:wheelslip", 0);
             }
 
-            double slowingSpeedChange = (-dragForce - rollingResistanceForce - gradientGravityForce) / equivalent_mass * delta;
+            double slowingSpeedChange = (-dragForce - rollingResistanceForce - gradientGravityForce - brakingForce * Math.Sign(speed)) / equivalent_mass * delta;
             double acceleratingSpeedChange = tractionForce / mass * delta;
 
             Vehicle.ChangeProperty("speed", acceleratingSpeedChange + slowingSpeedChange);
+            Vehicle.SetProperty("traction_force", 0);
+            Vehicle.SetProperty("braking_force", 0);
         }
     }
 }
