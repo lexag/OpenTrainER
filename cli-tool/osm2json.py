@@ -81,7 +81,7 @@ for point_id in region_data["points"]:
 		direction = point["linked_nodes"][neighbour]["direction"].copy()
 		if direction[1] < 0:
 			direction *= np.array([-1, -1])
-			dir_sum += direction
+		dir_sum += direction
 	tangent = normalize(dir_sum)
 	point["tangent"] = [tangent[0], tangent[1]]
 
