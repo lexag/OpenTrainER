@@ -130,41 +130,48 @@ with open(args.filename, 'r') as f:
 					total_distance += np.linalg.norm(pos_diff)
 					num_links += 1
 
+# prune nodes with no linked nodes (i.e. station markers etc, nodes not in the track)
+region_data["points"] = {id: point for id, point in region_data["points"].items() if len(point["linked_nodes"]) > 0}
 
 for point_id in region_data["points"]:
 	point = region_data["points"][point_id]
-	# calculate tangent
-	## Consider each neighbour direction
-	## Flip to between 0 -> pi (eg. 30deg and 210 deg are the same tangent direction)
-	## Average all neigbour directions => tangent direction
-	dir_sum = np.array([0.0, 0.0])
-	for neighbour in point["linked_nodes"]:
-		direction = point["linked_nodes"][neighbour]["direction"].copy()
-		if direction[1] < 0:
-			direction *= np.array([-1, -1])
-		dir_sum += direction
-	tangent = normalize(dir_sum)
-	point["tangent"] = [tangent[0], tangent[1]]
-
 	# calculate average direction of only 'forward' osm ways
 	dirsum = np.array([0.0, 0.0])
 	for neighbour in point["linked_nodes"]:
 		if point["linked_nodes"][neighbour]["osm_way_direction"] == 1:
 			dirsum += np.array(point["linked_nodes"][neighbour]["direction"]) * float(point["linked_nodes"][neighbour]["distance"])
-	point["osm_forward_vector"] = normalize(dirsum).tolist()
+	osm_fwd_vector = normalize(dirsum)	
+ 
+	# calculate tangent
+	dir_sum = np.array([0.0, 0.0])
+	if len(point["linked_nodes"]) == 1:
+		tangent = np.array(next(iter(point["linked_nodes"].values()))["direction"])
+	else:
+		record = 2 * math.pi
+		for neighbour_one in point["linked_nodes"]:
+			v1 = np.array(point["linked_nodes"][neighbour_one]["direction"].copy())
+			for neighbour_two in point["linked_nodes"]:
+				if neighbour_one == neighbour_two : continue
+				v2 = np.array(point["linked_nodes"][neighbour_one]["direction"].copy())
+				for i in [-1, 1]:
+					angle = np.arccos(np.clip(np.dot(normalize(v1), normalize(i*v2)), -1.0, 1.0))
+					if abs(angle) < record:
+						record = abs(angle)
+						tangent = normalize(v1 + i*v2)
+	tangent *= math.copysign(1, np.dot(tangent, osm_fwd_vector))
+	point["tangent"] = tangent.tolist()
+
 
 	# calculate feature position
 	if point["feature"] != {}:
 		ftr = point["feature"]
 		if ftr["feature_type"] in ["signal", "speed_sign", "sign"]:
-			ftr["direction"] = np.array(point["osm_forward_vector"]) * ftr["osm_direction"]
+			ftr["direction"] = np.array(point["tangent"]) * ftr["osm_direction"]
 			ftr["direction"] = ftr["direction"].tolist()
 			distance_from_track = 3
 			ftr["position"] = np.array(point["position"]) + np.array([ftr["direction"][1], -ftr["direction"][0]] * 1 if ftr["osm_position"] == "left" else -1) * distance_from_track
 			ftr["position"] = ftr["position"].tolist()
 
-# prune nodes with no linked nodes (i.e. station markers etc, nodes not in the track)
-region_data["points"] = {id: point for id, point in region_data["points"].items() if len(point["linked_nodes"]) > 0}
 
 
 with open(args.output, "w") as f:
