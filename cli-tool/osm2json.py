@@ -125,7 +125,9 @@ with open(args.filename, 'r') as f:
 						"direction": normalize(pos_diff).tolist(),
 						"distance": np.linalg.norm(pos_diff),
 						"gauge": int(element["tags"]["gauge"]) or 1435,
-						# "tags": {x: element["tags"][x] for x in element["tags"]}
+						"voltage": 0 if "voltage" not in element["tags"] else float(element["tags"]["voltage"]),
+						"frequency": 0 if "frequency" not in element["tags"] else float(element["tags"]["frequency"]),
+						"maxspeed": 40 if "maxspeed" not in element["tags"] else float(element["tags"]["maxspeed"]),
 						}
 					total_distance += np.linalg.norm(pos_diff)
 					num_links += 1

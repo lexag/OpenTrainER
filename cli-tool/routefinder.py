@@ -21,19 +21,21 @@ track_points = json.load(open(args.track_json_path, "r"))["points"]
 def getDistanceSquared(a, b):
 	if a == None or b == None:
 		return 1_000_000_000
-	xdif = float(track_points[a]["xoffset"]) - float(track_points[b]["xoffset"])
-	ydif = float(track_points[a]["yoffset"]) - float(track_points[b]["yoffset"])
-	return xdif ** 2 + ydif ** 2
+	apos = np.array(track_points[a]["position"])
+	bpos = np.array(track_points[b]["position"])
+	# xdif = float(track_points[a]["xoffset"]) - float(track_points[b]["xoffset"])
+	# ydif = float(track_points[a]["yoffset"]) - float(track_points[b]["yoffset"])
+	return np.linalg.norm(apos-bpos)
 
 def dotProduct(pa, pb, qa, qb):
 	if None in [pa, pb, qa, qb]:
 		return 0
-	px = float(track_points[pa]["xoffset"]) - float(track_points[pb]["xoffset"])
-	py = float(track_points[pa]["yoffset"]) - float(track_points[pb]["yoffset"])
-	qx = float(track_points[qa]["xoffset"]) - float(track_points[qb]["xoffset"])
-	qy = float(track_points[qa]["yoffset"]) - float(track_points[qb]["yoffset"])
+	papos = np.array(track_points[pa]["position"])
+	pbpos = np.array(track_points[pb]["position"])
+	qapos = np.array(track_points[qa]["position"])
+	qbpos = np.array(track_points[qb]["position"])
 
-	return px*qx + py*qy
+	return np.dot(papos - pbpos, qapos - qbpos)
 
 # -- CODE START --
 
@@ -51,7 +53,7 @@ def recursive_step(node, parent = None, depth = 0):
 	if node == args.end_node:
 		path.append(node)
 		return True
-	for neighbour, data in sorted(track_points[node]["linked_nodes"].items(), key=lambda elem: 0 if "maxspeed" not in elem[1]["tags"] else int(elem[1]["tags"]["maxspeed"]), reverse=True):
+	for neighbour, data in sorted(track_points[node]["linked_nodes"].items(), key=lambda elem: int(elem[1]["maxspeed"]), reverse=True):
 		dot = dotProduct(parent, node, node, neighbour)
 		if neighbour == parent or neighbour in visited_nodes or dot < 0:
 			continue
