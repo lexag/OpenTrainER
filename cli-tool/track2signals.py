@@ -113,7 +113,7 @@ with open(args.osm_path, 'r') as f:
 					"speed": -1 if "railway:signal:speed_limit" not in node["tags"] else int(node["tags"]["railway:signal:speed_limit"]),
 					"atc": "railway:atc" in node["tags"] and node["tags"]["railway:atc"] == "yes",
 					"direction": direction,
-					"offset": (np.array([direction[1], -direction[0]]) * (1 if node["tags"]["railway:signal:position"] == "right" else -1)).tolist()
+					"offset": (np.array([direction[1], 2 if NodeHasKeyValue(node, "railway:signal:height", "dwarf") else 0, -direction[0]]) * (np.array([1, 1, 1]) if node["tags"]["railway:signal:position"] == "right" else np.array([-1, 1, -1]))).tolist()
 				}
 
 

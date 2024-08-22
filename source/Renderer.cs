@@ -1,5 +1,6 @@
 using Godot;
 using Godot.NativeInterop;
+using OpenTrainER.source;
 using OpenTrainER.source.debug;
 using OpenTrainER.source.renderer;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ public partial class Renderer : Node
         AddChild(scene);
 		//scene.Visible = false;
 		scene.Rotation = new Vector3(0, Mathf.Pi, 0);
-		scene.Position += new Vector3(offset[0], offset[1], offset[2]);
+		scene.Position += Util.ToVector(offset);
 		foreach (var trackHeightMarker in scene.FindChildren("track-height*", recursive: true))
 		{
 			trackHeightMarkers.Add((Node3D)trackHeightMarker);
@@ -81,7 +82,7 @@ public partial class Renderer : Node
 	{
 		Node3D node = new Node3D();
 		AddChild(node);
-		node.Position = new Vector3((float)point.position[0], 0, (float)point.position[1]);
+		node.Position = Util.ToVector(point.position);
 
 		if (b_sprite)
 		{
@@ -114,19 +115,19 @@ public partial class Renderer : Node
 
 	Path3D InstanceTrackSegment(TrackPoint a, TrackPoint b, bool enableHeight = true, float gauge = 1.435f, float thickness = 0.2f)
 	{
-		Vector3 aPos = new Vector3((float)a.position[0], 0, (float)a.position[1]);
-		Vector3 bPos = new Vector3((float)b.position[0], 0, (float)b.position[1]);
+		Vector3 aPos = Util.ToVector(a.position);
+		Vector3 bPos = Util.ToVector(b.position);
 
-		if(enableHeight)
-		{
-            aPos.Y = EvaluateWeightedAveragePointHeight(aPos);
-            bPos.Y = EvaluateWeightedAveragePointHeight(bPos);
-        }
+		//if(enableHeight)
+		//{
+  //          aPos.Y = EvaluateWeightedAveragePointHeight(aPos);
+  //          bPos.Y = EvaluateWeightedAveragePointHeight(bPos);
+  //      }
 
   //      Vector3 aTangent = new Vector3(a.tangent[0], aPos.DirectionTo(bPos).Y, a.tangent[1]);
 		//Vector3 bTangent = new Vector3(b.tangent[0], bPos.DirectionTo(aPos).Y, b.tangent[1]);
-        Vector3 aTangent = new Vector3(a.tangent[0], 0, a.tangent[1]);
-        Vector3 bTangent = new Vector3(b.tangent[0], 0, b.tangent[1]);
+        Vector3 aTangent = Util.ToVector(a.tangent);
+        Vector3 bTangent = Util.ToVector(b.tangent);
         Vector3 abDisplacement = bPos - aPos;
 
 		

@@ -1,4 +1,5 @@
 using Godot;
+using OpenTrainER.source;
 using OpenTrainER.source.vehicle.component;
 using System;
 using System.Collections.Generic;
@@ -97,7 +98,7 @@ public static class Vehicle
 
 	private static Vector3 GetRoutePointPosition(int idx) {
 		TrackPoint point = WorldManager.track.points[currentRoute.points[idx]];
-		return new Vector3((float)point.position[0], 0, (float)point.position[1]);
+		return Util.ToVector(point.position);
 	}
 
 

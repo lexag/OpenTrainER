@@ -7,10 +7,11 @@ import numpy as np
 import re
 
 parser = argparse.ArgumentParser(
-					prog='OpenTrainER CLI Tool - osm2json',
-					description='Converts osm json files to OpenTrainER track.json files')
+					prog='OpenTrainER CLI Tool - generate track',
+					description='Converts osm and height data to OpenTrainER track.json files')
 
-parser.add_argument('filename')
+parser.add_argument('osm_path')
+parser.add_argument('height_path')
 parser.add_argument('output')
 parser.add_argument('origin_lat', type=float)
 parser.add_argument('origin_lon', type=float)
@@ -55,7 +56,7 @@ def CreatePointObject(node):
 	
 	point_object = {}
 	point_object["linked_nodes"] = {}
-	point_object["position"] = [-(lon - args.origin_lon)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000 / math.cos(lat * (math.pi / 180))), 
+	point_object["position2d"] = [-(lon - args.origin_lon)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000 / math.cos(lat * (math.pi / 180))), 
 								(lat - args.origin_lat)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000)]
 	
 	# point_object["signal"] = {}
@@ -87,6 +88,13 @@ def CreatePointObject(node):
 	return point_object
 
 
+def getDistance(points, a, b):
+	if a == None or b == None:
+		return 1_000_000_000
+	apos = np.array(points[a]["position2d"])
+	bpos = np.array(points[b]["position2d"])
+	return np.linalg.norm(apos-bpos)
+
 
 # -- CODE START --
 
@@ -99,7 +107,8 @@ region_data["points"] = {}
 region_data["origin"] = [float(args.origin_lat), float(args.origin_lon)]
 
 
-with open(args.filename, 'r') as f:
+with open(args.osm_path, 'r') as f:
+	print("placing points")
 	osm_data = json.load(f)
 	for element in osm_data["elements"]:
 		if (element["type"] == "node"):
@@ -125,8 +134,8 @@ with open(args.filename, 'r') as f:
 				if flag:
 					neighbour_idx = str(element["nodes"][i+idx_offset])
 					pos_diff = np.array(
-								[region_data["points"][neighbour_idx]["position"][0]-point_object["position"][0], 
-									region_data["points"][neighbour_idx]["position"][1]-point_object["position"][1]])
+								[region_data["points"][neighbour_idx]["position2d"][0]-point_object["position2d"][0], 
+									region_data["points"][neighbour_idx]["position2d"][1]-point_object["position2d"][1]])
 					point_object["linked_nodes"][neighbour_idx] = {
 						"osm_way_direction": idx_offset,
 						"direction": normalize(pos_diff).tolist(),
@@ -142,17 +151,86 @@ with open(args.filename, 'r') as f:
 # prune nodes with no linked nodes (i.e. station markers etc, nodes not in the track)
 region_data["points"] = {id: point for id, point in region_data["points"].items() if len(point["linked_nodes"]) > 0}
 
+# calculate heights
+with open(args.height_path, "r") as f:
+	print("generating heights...")
+	heights = json.load(f)
+	num_failed = 0
+	for i, point_id in enumerate(region_data["points"]):
+		if i % 100 == 0:
+			print(f"progress: {i}/{num_points}")
+		current_point = region_data["points"][point_id]
+		closest_points = []
+		
+		## breadth first node search
+		visited = []
+		point_stack = [point_id]
+		for i in range(100000):
+			try:
+				current_point_id = point_stack.pop(0)
+			except:
+				print(f"point {point_id} ran out at {current_point_id}")
+				break
+
+			if current_point_id in visited:
+				continue
+			for neighbour_id in region_data["points"][current_point_id]["linked_nodes"]:
+				point_stack.append(neighbour_id)
+			
+			for height_entry in heights:
+				if current_point_id == height_entry["id"]:
+					closest_points.append((current_point_id, height_entry["height"]))
+
+			
+			visited.append(current_point_id)
+			if len(closest_points) == 2:
+				break
+		
+		if len(closest_points) == 0:
+			height = 0
+			print(f"point {point_id} found no height reference and failed")
+			num_failed += 1
+		elif len(closest_points) == 1:
+			height = closest_points[0][1]
+		else:
+			pa_distance = getDistance(region_data["points"], point_id, closest_points[0][0])
+			pb_distance = getDistance(region_data["points"], point_id, closest_points[1][0])
+			if pa_distance < 0.0001:
+				height = closest_points[0][1]
+			elif pb_distance < 0.0001:
+				height = closest_points[1][1]
+			else:
+				total = 1/pa_distance + 1/pb_distance
+				a_contr = closest_points[0][1] / pa_distance
+				b_contr = closest_points[1][1] / pb_distance
+				height = (a_contr + b_contr) / total
+			print(f"{point_id} --- {closest_points} --- {height}")
+		current_point["position"] = [current_point["position2d"][0], height, current_point["position2d"][1]]
+	print(f"{num_failed} points failed height interpolation")
+
+
+for point_id in region_data["points"]:
+	point = region_data["points"][point_id]
+	#calculate distance/direction/gradient in 3d
+	for neighbour_id in point["linked_nodes"]:
+		link = point["linked_nodes"][neighbour_id]
+		n = region_data["points"][neighbour_id]
+		pos_diff = np.array(n["position"]) - np.array(point["position"])
+		link["direction"] = normalize(pos_diff).tolist()
+		link["distance"] = np.linalg.norm(pos_diff)
+		link["gradient"] = link["direction"][1] / link["distance"]
+
 for point_id in region_data["points"]:
 	point = region_data["points"][point_id]
 	# calculate average direction of only 'forward' osm ways
-	dirsum = np.array([0.0, 0.0])
+	dirsum = np.array([0.0, 0.0, 0.0])
 	for neighbour in point["linked_nodes"]:
 		if point["linked_nodes"][neighbour]["osm_way_direction"] == 1:
 			dirsum += np.array(point["linked_nodes"][neighbour]["direction"]) * float(point["linked_nodes"][neighbour]["distance"])
 	osm_fwd_vector = normalize(dirsum)	
  
 	# calculate tangent
-	dir_sum = np.array([0.0, 0.0])
+	dir_sum = np.array([0.0, 0.0, 0.0])
 	if len(point["linked_nodes"]) == 1:
 		tangent = np.array(next(iter(point["linked_nodes"].values()))["direction"])
 	else:
@@ -174,5 +252,9 @@ for point_id in region_data["points"]:
 
 with open(args.output, "w") as f:
 	json.dump(region_data, f, indent=2)
+
+
+
+
 
 print(f"Wrote {num_points} points, {num_links} links with length {round(total_distance, 1)} m to {args.output}")

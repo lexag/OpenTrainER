@@ -11,12 +11,12 @@ namespace OpenTrainER.source
 	{
 		public static Vector3 ToVector(float[] array)
 		{
-			return new Vector3(array[0], 0, array[1]);
+			return new Vector3(array[0], array[1], array[2]);
 		}
 
 		public static Vector3 ToVector(double[] array)
 		{
-			return new Vector3((float)array[0], 0, (float)array[1]);
+			return new Vector3((float)array[0], (float)array[1], (float)array[2]);
 		}
 	}
 }
