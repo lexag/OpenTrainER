@@ -99,8 +99,9 @@ public static class WorldManager
 		track = JSONLoader.LoadFile<TrackFileStruct>("lines/" + _lineName, "track.json");
 		signals = JSONLoader.LoadFile<SignalsFileStruct>("lines/" + _lineName, "signals.json").signals;
         signalingData = JSONLoader.LoadFile<SignalingFileStruct>("lines/" + _lineName, "signaling.json");
-
-        renderer.RenderTrack(track.points);
+		track = JSONLoader.LoadFile<TrackFileStruct>("lines/"+lineName, "track.json");
+		
+		renderer.RenderTrack(track.points);
 		renderer.RenderSignals(signals);
 	}
 
