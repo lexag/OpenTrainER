@@ -19,7 +19,7 @@ struct VehicleFileStruct
 public static class Vehicle
 {
 
-    public static Route currentRoute;
+	public static Route currentRoute;
 	public static int routePointIndex = 1;
 
 	public static Node3D vehicleNode;
@@ -89,16 +89,16 @@ public static class Vehicle
 		}
 
 		// Debug
-		foreach (var property in properties)
-		{
-			GD.Print($"{property.Key}: {property.Value}");
-		}
+		//foreach (var property in properties)
+		//{
+		//	GD.Print($"{property.Key}: {property.Value}");
+		//}
 	}
 
 	private static Vector3 GetRoutePointPosition(int idx) {
 		TrackPoint point = WorldManager.track.points[currentRoute.points[idx]];
-		return new Vector3((float)point.xoffset, 0, (float)point.yoffset);
-    }
+		return new Vector3((float)point.position[0], 0, (float)point.position[1]);
+	}
 
 
 	public static double GetProperty(string name)
@@ -122,34 +122,34 @@ public static class Vehicle
 	}
 
 
-    /// <summary>
-    /// Used by VehicleComponents
-    /// Tries to change property and returns whether property exists.
-    /// </summary>
-    public static bool ChangeProperty(string name, double value)
-    {
-        if (!properties.ContainsKey(name))
-        {
-            return false;
-        }
-        properties[name] += value;
-        return true;
-    }
+	/// <summary>
+	/// Used by VehicleComponents
+	/// Tries to change property and returns whether property exists.
+	/// </summary>
+	public static bool ChangeProperty(string name, double value)
+	{
+		if (!properties.ContainsKey(name))
+		{
+			return false;
+		}
+		properties[name] += value;
+		return true;
+	}
 
 
-    /// <summary>
-    /// Used by VehicleComponents
-    /// Tries to init property (with optional value) and returns whether property was inited properly.
-    /// </summary>
+	/// <summary>
+	/// Used by VehicleComponents
+	/// Tries to init property (with optional value) and returns whether property was inited properly.
+	/// </summary>
 	public static bool InitProperty(string name, double value = 0.0) 
 	{
-        if (properties.ContainsKey(name))
-        {
-            return false;
-        }
-        properties[name] = value;
-        return true;
-    }
+		if (properties.ContainsKey(name))
+		{
+			return false;
+		}
+		properties[name] = value;
+		return true;
+	}
 
 }
 

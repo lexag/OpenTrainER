@@ -58,24 +58,31 @@ def CreatePointObject(node):
 	point_object["position"] = [-(lon - args.origin_lon)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000 / math.cos(lat * (math.pi / 180))), 
 								(lat - args.origin_lat)/((1 / ((2 * math.pi / 360) * 6378.137)) / 1000)]
 	
-	point_feature = {}
-	if NodeHasKeyValue(node, "railway", "signal") and NodeHasKeyValueRegex(node, "railway:signal:\w+:form", "light"):
-		point_feature = {
-			"feature_type": "signal",
-			"id": "0" if "ref" not in node["tags"] else node["tags"]["ref"],
-			"atc": "railway:atc" in node["tags"] and node["tags"]["railway:atc"] == "yes",
-			"osm_position": node["tags"]["railway:signal:position"],
-			"osm_direction": 1 if node["tags"]["railway:signal:direction"] == "forward" else -1,
-		}
-	elif NodeHasKeyValue(node, "railway", "signal") and NodeHasKeyRegex(node, "railway:signal:speed_limit"):
-		point_feature = {
-			"feature_type": "speed_sign",
-			"speed": node["tags"]["railway:signal:speed_limit"],
-			"atc": "railway:atc" in node["tags"] and node["tags"]["railway:atc"] == "yes",
-			"osm_position": node["tags"]["railway:signal:position"],
-			"osm_direction": 1 if node["tags"]["railway:signal:direction"] == "forward" else -1,
-		}
-	point_object["feature"] = point_feature
+	# point_object["signal"] = {}
+	# if NodeHasKeyValue(node, "railway", "signal") and NodeHasKeyValueRegex(node, "railway:signal:\w+:form", "light"):
+	# 	m = None
+	# 	for k in node["tags"]:
+	# 		if ma := re.search("railway:signal:(\w+):form", k):
+	# 			m = ma
+	# 			break
+	# 	point_object["signal"] = {
+	# 		"id": "0" if "ref" not in node["tags"] else node["tags"]["ref"],
+	# 		"osm_type": m.group(1),
+	# 		"speed": -1 if "railway:signal:speed_limit" not in node["tags"] else int(node["tags"]["railway:signal:speed_limit"]),
+	# 		"atc": "railway:atc" in node["tags"] and node["tags"]["railway:atc"] == "yes",
+	# 		"osm_position": node["tags"]["railway:signal:position"],
+	# 		"osm_direction": 1 if node["tags"]["railway:signal:direction"] == "forward" else -1,
+	# 	}
+	
+	# point_object["sign"] = {}
+	# if NodeHasKeyValue(node, "railway", "signal") and NodeHasKeyRegex(node, "railway:signal:speed_limit"):
+	# 	point_object["sign"] = {
+	# 		"type": "speed_sign",
+	# 		"speed": node["tags"]["railway:signal:speed_limit"],
+	# 		"atc": "railway:atc" in node["tags"] and node["tags"]["railway:atc"] == "yes",
+	# 		"osm_position": node["tags"]["railway:signal:position"],
+	# 		"osm_direction": 1 if node["tags"]["railway:signal:direction"] == "forward" else -1,
+	# 	}
 	
 	return point_object
 
@@ -164,17 +171,8 @@ for point_id in region_data["points"]:
 	point["tangent"] = tangent.tolist()
 
 
-	# calculate feature position
-	if point["feature"] != {}:
-		ftr = point["feature"]
-		if ftr["feature_type"] in ["signal", "speed_sign", "sign"]:
-			ftr["direction"] = np.array(point["tangent"]) * ftr["osm_direction"]
-			ftr["direction"] = ftr["direction"].tolist()
-			distance_from_track = 3
-			ftr["position"] = np.array(point["position"]) + np.array([ftr["direction"][1], -ftr["direction"][0]] * 1 if ftr["osm_position"] == "left" else -1) * distance_from_track
-			ftr["position"] = ftr["position"].tolist()
-
 
 with open(args.output, "w") as f:
 	json.dump(region_data, f, indent=2)
+
 print(f"Wrote {num_points} points, {num_links} links with length {round(total_distance, 1)} m to {args.output}")
