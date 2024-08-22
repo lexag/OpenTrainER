@@ -175,7 +175,6 @@ for point_id in region_data["points"]:
 			ftr["position"] = ftr["position"].tolist()
 
 
-
 with open(args.output, "w") as f:
 	json.dump(region_data, f, indent=2)
 print(f"Wrote {num_points} points, {num_links} links with length {round(total_distance, 1)} m to {args.output}")
