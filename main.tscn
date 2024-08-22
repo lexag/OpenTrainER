@@ -1,38 +1,48 @@
-[gd_scene load_steps=7 format=3 uid="uid://1umlw7ie4via"]
+[gd_scene load_steps=9 format=3 uid="uid://1umlw7ie4via"]
 
 [ext_resource type="Script" path="res://source/Renderer.cs" id="1_8etd7"]
 [ext_resource type="Texture2D" uid="uid://mlgnf0gihi5n" path="res://icon.svg" id="2_miq24"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0fc8r"]
-sky_top_color = Color(0.25098, 0.384314, 0.666667, 1)
-sky_horizon_color = Color(0.435294, 0.686275, 0.862745, 1)
-sky_curve = 0.0630672
-ground_bottom_color = Color(0.160784, 0.137255, 0.105882, 1)
-ground_horizon_color = Color(0.564706, 0.690196, 0.623529, 1)
-sun_angle_max = 44.3
-
-[sub_resource type="Sky" id="Sky_x1hch"]
-sky_material = SubResource("ProceduralSkyMaterial_0fc8r")
-radiance_size = 5
-
-[sub_resource type="Environment" id="Environment_ms257"]
-background_mode = 2
-sky = SubResource("Sky_x1hch")
-ambient_light_source = 3
-reflected_light_source = 2
-tonemap_mode = 2
-ssr_enabled = true
-ssao_enabled = true
-ssil_enabled = true
-sdfgi_enabled = true
-glow_enabled = true
-adjustment_enabled = true
-adjustment_brightness = 1.28
-adjustment_contrast = 1.11
+[ext_resource type="PackedScene" uid="uid://bs2jm62cmkbrk" path="res://addons/instant-realistic-light/light_scene.tscn" id="3_rt7ev"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_osm4g"]
-dof_blur_far_enabled = true
-dof_blur_far_distance = 2000.0
+dof_blur_far_distance = 1567.96
+dof_blur_far_transition = 8192.0
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_gn88m"]
+ground_color = Color(0, 0, 0, 1)
+
+[sub_resource type="Sky" id="Sky_tyhie"]
+sky_material = SubResource("PhysicalSkyMaterial_gn88m")
+radiance_size = 2
+
+[sub_resource type="Environment" id="Environment_f8w8m"]
+background_mode = 2
+background_intensity = 100000.0
+sky = SubResource("Sky_tyhie")
+tonemap_mode = 3
+tonemap_white = 8.0
+ssao_enabled = true
+ssao_detail = 2.0
+sdfgi_enabled = true
+sdfgi_bounce_feedback = 0.9
+glow_enabled = true
+glow_normalized = true
+glow_bloom = 0.2
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
+volumetric_fog_gi_inject = 1.14
+volumetric_fog_anisotropy = 0.7
+volumetric_fog_detail_spread = 2.37841
+volumetric_fog_sky_affect = 0.295
+adjustment_saturation = 1.17
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_qo5hu"]
+exposure_multiplier = 3.069
+auto_exposure_scale = 0.22
+auto_exposure_speed = 0.8
+dof_blur_far_distance = 1.44
+dof_blur_near_distance = 0.01
+auto_exposure_min_sensitivity = 8.01
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_8etd7")
@@ -45,14 +55,6 @@ texture = ExtResource("2_miq24")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.44, 0, 385)
 texture = ExtResource("2_miq24")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.919018, 0.138308, -0.369156, 0.197107, 0.649759, 0.73414, 0.3414, -0.747452, 0.569879, 0.0650196, 1.51272, 0.150281)
-visible = false
-light_energy = 2.143
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_ms257")
-
 [node name="vehicle" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 276.565, 200)
 
@@ -60,3 +62,8 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 276
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 3, 0)
 attributes = SubResource("CameraAttributesPractical_osm4g")
 current = true
+fov = 47.6
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." instance=ExtResource("3_rt7ev")]
+environment = SubResource("Environment_f8w8m")
+camera_attributes = SubResource("CameraAttributesPractical_qo5hu")

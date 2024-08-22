@@ -23,6 +23,10 @@ window/subwindows/embed_subwindows=false
 
 project/assembly_name="OpenTrainER"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/instant-realistic-light/plugin.cfg")
+
 [filesystem]
 
 import/fbx/enabled=false
