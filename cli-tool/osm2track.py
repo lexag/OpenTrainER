@@ -172,7 +172,6 @@ for point_id in region_data["points"]:
 
 
 
-
 with open(args.output, "w") as f:
 	json.dump(region_data, f, indent=2)
 
