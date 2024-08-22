@@ -27,6 +27,7 @@ internal static class GLTFLoader
         GltfState state;
         Error error = Error.Ok;
 
+        // Load from file or cache
         if (loadedResources.ContainsKey(filePath))
         {
             (document, state) = loadedResources[filePath];
@@ -45,6 +46,10 @@ internal static class GLTFLoader
         if (error == Error.Ok)
         {
             Node3D node = (Node3D)document.GenerateScene(state);
+            foreach (var material in state.Materials)
+            {
+                ((BaseMaterial3D)material).TextureFilter = BaseMaterial3D.TextureFilterEnum.LinearWithMipmapsAnisotropic;
+            }
             return node;
         }
         GD.PrintErr($"Failed loading glTF scene from '{filePath}' (error code: {error}).");
