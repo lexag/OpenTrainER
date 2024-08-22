@@ -99,18 +99,16 @@ public partial class Renderer : Node
 
 	private float EvaluateWeightedAveragePointHeight(Vector3 pos)
 	{
-        float heightSum = 0;
-        float weightSum = 0;
-        foreach (Node3D node in trackHeightMarkers)
-        {
-			float weight = 1 / node.GlobalPosition.DistanceTo(pos);
-			weightSum += weight;
-			heightSum += node.GlobalPosition.Y * weight;
-        }
-		if (weightSum == 0) {
-			return 0;
-		}
-		return heightSum / weightSum;
+        List<Node3D> sortedList = trackHeightMarkers.OrderBy(o => o.Position.DistanceSquaredTo(new Vector3(pos.X, o.Position.Y, pos.Z))).Reverse().ToList();
+		Node3D closest = sortedList[0];
+		Node3D secondClosest = sortedList[1];
+		Vector3 flat = new Vector3(1, 0, 1);
+		float a = closest.Position.Y;
+		float b = secondClosest.Position.Y;
+        float da = (closest.Position * flat).DistanceTo(pos * flat);
+        float db = (secondClosest.Position * flat).DistanceTo(pos * flat);
+		float D = da + db;
+		return a * (1-da/D) + b * (1-db/D);
     }
 
 
