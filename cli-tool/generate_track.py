@@ -107,106 +107,124 @@ region_data["points"] = {}
 region_data["origin"] = [float(args.origin_lat), float(args.origin_lon)]
 
 
-with open(args.osm_path, 'r') as f:
-	print("placing points")
-	osm_data = json.load(f)
-	for element in osm_data["elements"]:
-		if (element["type"] == "node"):
-			obj = CreatePointObject(element)
-			region_data["points"][str(element["id"])] = obj
-			num_points += 1
-		
-		elif (element["type"] == "way"):
-			for i, node in enumerate(element["nodes"]):
-				if str(node) not in region_data["points"]:
-					region_data["points"][str(node)] = CreateCrudePointObject(node, element["geometry"][i]["lat"], element["geometry"][i]["lon"])
-					num_points += 1
+osm_data = json.load(open(args.osm_path, 'r'))
+heights = json.load(open(args.height_path, 'r'))
+
+## Iterate over all nodes in osm data and create points for each node.
+print("placing points")
+for element in osm_data["elements"]:
+    ## If node => has some data stored => create node
+    if (element["type"] == "node"):
+        obj = CreatePointObject(element)
+        region_data["points"][str(element["id"])] = obj
+        num_points += 1
+    
+    ## If way => are "dummy" points => ceate 'empty' point for each node along way. 
+    elif (element["type"] == "way"):
+
+        for i, node in enumerate(element["nodes"]):
+            if str(node) not in region_data["points"]:
+                region_data["points"][str(node)] = CreateCrudePointObject(node, element["geometry"][i]["lat"], element["geometry"][i]["lon"])
+                num_points += 1
 
 
-	# find neighbours
-	for element in osm_data["elements"]:
-		if (element["type"] != "way") : continue
-		# consider previous point and next point in current way
-		for i, node in enumerate(element["nodes"]):
-			node = str(node)
-			for flag, idx_offset in [(i < len(element["nodes"])-1, 1), (i > 0, -1)]:
-				point_object = region_data["points"][node]
-				if flag:
-					neighbour_idx = str(element["nodes"][i+idx_offset])
-					pos_diff = np.array(
-								[region_data["points"][neighbour_idx]["position2d"][0]-point_object["position2d"][0], 
-									region_data["points"][neighbour_idx]["position2d"][1]-point_object["position2d"][1]])
-					point_object["linked_nodes"][neighbour_idx] = {
-						"osm_way_direction": idx_offset,
-						"direction": normalize(pos_diff).tolist(),
-						"distance": np.linalg.norm(pos_diff),
-						"gauge": int(element["tags"]["gauge"]) or 1435,
-						"voltage": 0 if "voltage" not in element["tags"] else float(element["tags"]["voltage"]),
-						"frequency": 0 if "frequency" not in element["tags"] else float(element["tags"]["frequency"]),
-						"maxspeed": 40 if "maxspeed" not in element["tags"] else float(element["tags"]["maxspeed"]),
-						}
-					total_distance += np.linalg.norm(pos_diff)
-					num_links += 1
+## Find neighbours: 
+## Iterate all ways in osm_data and make sequential points reference each other.
+## Also store way data in the link, such as track gauge, voltage, maxspeed; as well as handy lookups of direction and distance
+for element in osm_data["elements"]:
+    if (element["type"] != "way") : continue
+    # consider previous point and next point in current way
+    for i, node in enumerate(element["nodes"]):
+        node = str(node)
+        for flag, idx_offset in [(i < len(element["nodes"])-1, 1), (i > 0, -1)]:
+            point_object = region_data["points"][node]
+            if flag:
+                neighbour_idx = str(element["nodes"][i+idx_offset])
+                pos_diff = np.array(
+                            [region_data["points"][neighbour_idx]["position2d"][0]-point_object["position2d"][0], 
+                                region_data["points"][neighbour_idx]["position2d"][1]-point_object["position2d"][1]])
+                point_object["linked_nodes"][neighbour_idx] = {
+                    "osm_way_direction": idx_offset,
+                    "direction": normalize(pos_diff).tolist(),
+                    "distance": np.linalg.norm(pos_diff),
+                    "gauge": int(element["tags"]["gauge"]) or 1435,
+                    "voltage": 0 if "voltage" not in element["tags"] else float(element["tags"]["voltage"]),
+                    "frequency": 0 if "frequency" not in element["tags"] else float(element["tags"]["frequency"]),
+                    "maxspeed": 40 if "maxspeed" not in element["tags"] else float(element["tags"]["maxspeed"]),
+                    }
+                total_distance += np.linalg.norm(pos_diff)
+                num_links += 1
 
-# prune nodes with no linked nodes (i.e. station markers etc, nodes not in the track)
+
+## prune nodes with no linked nodes (i.e. station markers etc, nodes not in the track)
 region_data["points"] = {id: point for id, point in region_data["points"].items() if len(point["linked_nodes"]) > 0}
 
-# calculate heights
-with open(args.height_path, "r") as f:
-	print("generating heights...")
-	heights = json.load(f)
-	num_failed = 0
-	for i, point_id in enumerate(region_data["points"]):
-		if i % 100 == 0:
-			print(f"progress: {i}/{num_points}")
-		current_point = region_data["points"][point_id]
-		closest_points = []
-		
-		## breadth first node search
-		visited = []
-		point_stack = [point_id]
-		for i in range(100000):
-			try:
-				current_point_id = point_stack.pop(0)
-			except:
-				print(f"point {point_id} ran out at {current_point_id}")
-				break
+## Calculate heights:
+## Walk breadth first along track from each point to find two first known point heights (optimize by storing calculated heights as known?)
+## Interpolate between closest points by weighted distance.
+print("generating heights...")
+num_failed = 0
+for i, point_id in enumerate(region_data["points"]):
+    if i % 100 == 0:
+        print(f"progress: {i}/{num_points}")
+    current_point = region_data["points"][point_id]
+    closest_points = []
+    
+    ## breadth first node search
+    visited = []
+    point_stack = [point_id]
+    for i in range(100000):
+        try:
+            current_point_id = point_stack.pop(0)
+        except:
+            print(f"point {point_id} ran out at {current_point_id}")
+            break
 
-			if current_point_id in visited:
-				continue
-			for neighbour_id in region_data["points"][current_point_id]["linked_nodes"]:
-				point_stack.append(neighbour_id)
-			
-			for height_entry in heights:
-				if current_point_id == height_entry["id"]:
-					closest_points.append((current_point_id, height_entry["height"]))
+        if current_point_id in visited:
+            continue
+        for neighbour_id in region_data["points"][current_point_id]["linked_nodes"]:
+            point_stack.append(neighbour_id)
+        
+        for height_entry in heights:
+            if current_point_id == height_entry["id"]:
+                closest_points.append((current_point_id, height_entry["height"]))
 
-			
-			visited.append(current_point_id)
-			if len(closest_points) == 2:
-				break
-		
-		if len(closest_points) == 0:
-			height = 0
-			print(f"point {point_id} found no height reference and failed")
-			num_failed += 1
-		elif len(closest_points) == 1:
-			height = closest_points[0][1]
-		else:
-			pa_distance = getDistance(region_data["points"], point_id, closest_points[0][0])
-			pb_distance = getDistance(region_data["points"], point_id, closest_points[1][0])
-			if pa_distance < 0.0001:
-				height = closest_points[0][1]
-			elif pb_distance < 0.0001:
-				height = closest_points[1][1]
-			else:
-				total = 1/pa_distance + 1/pb_distance
-				a_contr = closest_points[0][1] / pa_distance
-				b_contr = closest_points[1][1] / pb_distance
-				height = (a_contr + b_contr) / total
-			print(f"{point_id} --- {closest_points} --- {height}")
-		current_point["position"] = [current_point["position2d"][0], height, current_point["position2d"][1]]
-	print(f"{num_failed} points failed height interpolation")
+        
+        visited.append(current_point_id)
+        if len(closest_points) == 2:
+            break
+    
+    ## Three outccomes from search (A, B, C):
+    ## A: No known points found => no height reference => fail and set height 0
+    if len(closest_points) == 0:
+        height = 0
+        print(f"point {point_id} found no height reference and failed")
+        num_failed += 1
+
+    ## B: A single known point found => no interpolation, set height to reference (flat track, such as microspurs)
+    elif len(closest_points) == 1:
+        height = closest_points[0][1]
+
+    ## C: Two known points found => interpolate between
+    else:
+        pa_distance = getDistance(region_data["points"], point_id, closest_points[0][0])
+        pb_distance = getDistance(region_data["points"], point_id, closest_points[1][0])
+        
+        ## If one distance is 0, we're trying to interpolate at a known point. (FIXME: Optimize by checking before if point is known)
+        if pa_distance < 0.0001:
+            height = closest_points[0][1]
+        elif pb_distance < 0.0001:
+            height = closest_points[1][1]
+        
+        ## Interpolate by weighted distance
+        else:
+            total = 1/pa_distance + 1/pb_distance
+            a_contr = closest_points[0][1] / pa_distance
+            b_contr = closest_points[1][1] / pb_distance
+            height = (a_contr + b_contr) / total
+        print(f"{point_id} --- {closest_points} --- {height}")
+    current_point["position"] = [current_point["position2d"][0], height, current_point["position2d"][1]]
+print(f"{num_failed} points failed height interpolation")
 
 
 for point_id in region_data["points"]:
